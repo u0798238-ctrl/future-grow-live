@@ -43,6 +43,7 @@ export function WithdrawalPage() {
   const [bankName, setBankName] = useState('');
   const [isKycApproved, setIsKycApproved] = useState(false);
   const [userPan, setUserPan] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error', title?: string, text: string, details?: string[] } | null>(null);
 
@@ -166,10 +167,13 @@ export function WithdrawalPage() {
     }
   };
 
-  const handleWithdraw = (e: React.FormEvent) => {
+  const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     setToastMessage(null); // Reset previous message
 
+  try {
     if (isFreeOrInactive) {
       setToastMessage({
         type: 'error',
@@ -280,9 +284,8 @@ export function WithdrawalPage() {
        localStorage.setItem('mlm_users', JSON.stringify(users));
        
        // CRITICAL: Push to Cloud immediately so all admin devices sync the deduction!
-       import('@/lib/mlmStore').then(({ pushMlmStateToSupabase }) => {
-           pushMlmStateToSupabase('mlm_users', users);
-       });
+       const { pushMlmStateToSupabase } = await import('@/lib/mlmStore');
+           await pushMlmStateToSupabase('mlm_users', users);
        
        window.dispatchEvent(new Event('mlm_update'));
        setAmount('');
@@ -298,13 +301,16 @@ export function WithdrawalPage() {
          ]
        });
     }
+  } finally {
+    setIsSubmitting(false);
+  }
   };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-semibold text-white">Withdraw Funds</h2>
+          <h2 className="text-2xl font-semibold text-white">{isSubmitting ? 'Processing...' : 'Withdraw Funds'}</h2>
           <p className="text-gray-300 text-sm">Request payout from your available commission wallet</p>
         </div>
       </div>
@@ -749,7 +755,7 @@ export function WithdrawalPage() {
                 type="submit" 
                 disabled={!isCurrentMethodValid || !amount || withdrawAmtNum < 500 || withdrawAmtNum > (userStats?.availableBalance || 0)}
                 className={`w-full h-auto min-h-[3.5rem] whitespace-normal px-4 py-3 text-sm sm:text-base font-semibold shadow-md transition-all ${
-                  isCurrentMethodValid && amount && withdrawAmtNum >= 500 && withdrawAmtNum <= (userStats?.availableBalance || 0)
+                  !isSubmitting && isCurrentMethodValid && amount && withdrawAmtNum >= 500 && withdrawAmtNum <= (userStats?.availableBalance || 0)
                     ? 'bg-[#35B779] hover:bg-[#2fa067] text-white cursor-pointer shadow-[0_0_15px_rgba(53,183,121,0.4)] hover:shadow-[0_0_20px_rgba(53,183,121,0.6)] border-2 border-[#35B779]'
                     : 'bg-gray-800 text-gray-300 border border-[#35576A] cursor-not-allowed opacity-75'
                 }`}

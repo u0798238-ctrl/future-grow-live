@@ -100,7 +100,7 @@ export function UsersPage() {
     navigate('/user/dashboard');
   };
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     if (!addFormData.name?.trim() || !addFormData.mobile?.trim()) {
       showToast('Please fill out Full Name and Mobile Number.', 'error');
       return;
@@ -110,7 +110,7 @@ export function UsersPage() {
       const isBetween = addFormData.placementMode === 'inBetween';
       const freeUtr = `ADMIN-FREE-${Date.now().toString().slice(-6)}`;
 
-      const newUser = addMlmUser({
+      const newUser = await addMlmUser({
         name: addFormData.name.trim(),
         username: addFormData.username ? addFormData.username.trim() : undefined,
         mobile: addFormData.mobile.trim(),

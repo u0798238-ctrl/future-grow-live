@@ -121,12 +121,14 @@ export const pushMlmStateToSupabase = async (key: string, value: any): Promise<b
     };
 
     // 1. Save to generic table
-    const { error } = await supabase
-      .from('mlm_app_data')
-      .upsert(payload, { onConflict: 'key_name' });
+    if (key !== 'mlm_users') {
+      const { error } = await supabase
+        .from('mlm_app_data')
+        .upsert(payload, { onConflict: 'key_name' });
 
-    if (error) {
-      console.info(`Supabase sync note for [${key}]:`, error.message);
+      if (error) {
+        console.info(`Supabase sync note for [${key}]:`, error.message);
+      }
     }
 
     // 2. If it is users list, also attempt individual user upsert into `users` table
@@ -219,6 +221,7 @@ export const startSupabaseSync = async () => {
 
   // 1. Initial Pull from Supabase for all keys
   for (const key of SUPABASE_SYNC_KEYS) {
+    if (key === 'mlm_users') continue; // Handled exclusively by Firebase
     try {
       const remoteResp = await pullMlmStateFromSupabase(key);
       if (remoteResp) {
@@ -259,6 +262,7 @@ export const startSupabaseSync = async () => {
         (payload: any) => {
           if (payload.new && payload.new.key_name && payload.new.data) {
             const key = payload.new.key_name;
+            if (key === 'mlm_users') return; // Handled exclusively by Firebase
             const remoteTime = new Date(payload.new.updated_at || 0).getTime();
             const localTimeStr = localStorage.getItem(`${key}_last_pushed_at`);
             const localTime = localTimeStr ? parseInt(localTimeStr) : 0;

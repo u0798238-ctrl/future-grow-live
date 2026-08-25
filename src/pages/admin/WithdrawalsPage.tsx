@@ -9,6 +9,7 @@ export function WithdrawalsPage() {
   const [users, setUsers] = useState<MlmUser[]>([]);
   const [selectedWithdrawal, setSelectedWithdrawal] = useState<any | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const loadData = () => setUsers(getMlmUsers());
@@ -17,7 +18,10 @@ export function WithdrawalsPage() {
     return () => window.removeEventListener('mlm_update', loadData);
   }, []);
 
-  const handleStatusChange = (userId: string, txId: string, newStatus: string) => {
+  const handleStatusChange = async (userId: string, txId: string, newStatus: string) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
     let allUsers = getMlmUsers();
     const user = allUsers.find(u => u.id === userId);
     if (user) {
@@ -33,14 +37,18 @@ export function WithdrawalsPage() {
          
          localStorage.setItem('mlm_users', JSON.stringify(allUsers));
          
-         import('@/lib/mlmStore').then(({ pushMlmStateToSupabase }) => {
-            pushMlmStateToSupabase('mlm_users', allUsers);
-         });
+         const { pushMlmStateToSupabase } = await import('@/lib/mlmStore');
+            await pushMlmStateToSupabase('mlm_users', allUsers);
+
+
          
          window.dispatchEvent(new Event('mlm_update'));
          setUsers(allUsers);
          setSelectedWithdrawal(null);
        }
+    }
+    } finally {
+       setIsSubmitting(false);
     }
   };
 

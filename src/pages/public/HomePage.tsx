@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Target, Users, Sparkles, Globe2, Rocket, Sprout, Gem, Flame, Clock, Download, Smartphone, MessageCircle, Youtube } from 'lucide-react';
+import { ArrowRight, Star, MapPin, Target, Users, Sparkles, Globe2, Rocket, Sprout, Gem, Flame, Clock, Download, Smartphone, MessageCircle, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 export function HomePage() {
@@ -66,9 +66,32 @@ export function HomePage() {
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-72 h-72 bg-[#6F9DB5] rounded-full blur-[100px] opacity-10"></div>
         
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1B3343] border border-[#35576A] text-gray-300 text-xs font-medium uppercase tracking-widest mb-6 shadow-sm">
-            <Star className="w-3.5 h-3.5 text-[#D99A4A]" />
-            A New Opportunity for a Better Tomorrow
+          <div className="flex flex-col items-center gap-3 mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1B3343] border border-[#35576A] text-gray-300 text-xs font-medium uppercase tracking-widest shadow-sm">
+              <Star className="w-3.5 h-3.5 text-[#D99A4A]" />
+              A New Opportunity for a Better Tomorrow
+            </div>
+            
+            <div className="relative group cursor-default mx-auto w-full max-w-xl mb-4 mt-2">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#6F9DB5]/30 to-[#35B779]/30 rounded-2xl blur-xl opacity-40 group-hover:opacity-80 transition-opacity duration-700"></div>
+              <div className="relative rounded-2xl overflow-hidden border border-[#28485A]/50 shadow-2xl">
+                <img 
+                  src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop" 
+                  alt="Future Grow Corporate Head Office" 
+                  className="w-full h-36 md:h-48 object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5 text-left flex items-end justify-between">
+                  <div>
+                    <h3 className="text-lg md:text-xl font-bold text-white mb-0.5 shadow-sm drop-shadow-lg">Corporate Head Office</h3>
+                    <p className="text-xs md:text-sm text-gray-200 font-medium flex items-center gap-1.5 drop-shadow-md">
+                      <MapPin className="w-3.5 h-3.5 text-[#35B779]" /> Gomti Nagar, Lucknow, UP – 226010, India
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-8 drop-shadow-sm">
@@ -139,6 +162,133 @@ export function HomePage() {
                 <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5]"></div> Leadership & Communication</li>
                 <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5]"></div> Personal Development</li>
               </ul>
+            </div>
+          </div>
+
+          {/* Life at Future Grow - Image Gallery */}
+          <div className="pt-8 pb-4">
+            <h2 className="text-2xl md:text-3xl font-semibold text-white uppercase tracking-wider text-center mb-10">Life at Future Grow</h2>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 h-auto md:h-[500px]">
+              
+              {/* Large Image (Meeting) */}
+              <div className="md:col-span-8 relative rounded-3xl overflow-hidden group shadow-2xl h-[300px] md:h-full border border-[#28485A]/40">
+                <div className="absolute inset-0 bg-[#071E2C]/20 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
+                <img 
+                  src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2000&auto=format&fit=crop" 
+                  alt="Corporate Team Meeting" 
+                  className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
+                <div className="absolute bottom-0 left-0 p-6 md:p-8 z-30">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1B3343]/80 border border-[#6F9DB5]/30 text-[#6F9DB5] text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-md">
+                    Leadership & Vision
+                  </div>
+                  <h3 className="text-xl md:text-3xl font-bold text-white mb-2 shadow-sm drop-shadow-lg">Corporate Meetings</h3>
+                  <p className="text-sm md:text-base text-gray-300 max-w-md drop-shadow-md">Collaborating with the best minds to drive innovation and support our growing network.</p>
+                </div>
+              </div>
+
+              {/* Smaller Images Stack (Car/Lifestyle & Working) */}
+              <div className="md:col-span-4 flex flex-col gap-4 md:gap-6 h-full">
+                
+                {/* Working Image */}
+                <div className="relative rounded-3xl overflow-hidden group shadow-xl h-[250px] md:h-1/2 border border-[#28485A]/40">
+                  <div className="absolute inset-0 bg-[#071E2C]/30 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
+                  <img 
+                    src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1000&auto=format&fit=crop" 
+                    alt="Corporate Office" 
+                    className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
+                  <div className="absolute bottom-0 left-0 p-5 md:p-6 z-30">
+                    <h3 className="text-lg md:text-xl font-bold text-white mb-1 shadow-sm drop-shadow-lg">Premium Workspaces</h3>
+                    <p className="text-xs md:text-sm text-gray-300 drop-shadow-md">Professional environment for our leaders.</p>
+                  </div>
+                </div>
+
+                {/* Car/Success Image */}
+                <div className="relative rounded-3xl overflow-hidden group shadow-xl h-[250px] md:h-1/2 border border-[#28485A]/40">
+                  <div className="absolute inset-0 bg-[#071E2C]/40 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
+                  <img 
+                    src="https://images.unsplash.com/photo-1614200187524-dc4b892acf16?q=80&w=1000&auto=format&fit=crop" 
+                    alt="Luxury Car Success" 
+                    className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
+                  <div className="absolute bottom-0 left-0 p-5 md:p-6 z-30">
+                    <h3 className="text-lg md:text-xl font-bold text-white mb-1 shadow-sm drop-shadow-lg">Achieving Success</h3>
+                    <p className="text-xs md:text-sm text-gray-300 drop-shadow-md">Reaching financial milestones and living the dream.</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          {/* Mega Events & Rewards - Image Gallery 2 */}
+          <div className="pt-2 pb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              
+              {/* Mega Seminars Image */}
+              <div className="relative rounded-3xl overflow-hidden group shadow-xl h-[300px] border border-[#28485A]/40">
+                <div className="absolute inset-0 bg-[#071E2C]/30 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
+                <img 
+                  src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1000&auto=format&fit=crop" 
+                  alt="Mega Seminars" 
+                  className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
+                <div className="absolute bottom-0 left-0 p-5 md:p-6 z-30">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1B3343]/80 border border-[#35B779]/30 text-[#35B779] text-[10px] font-bold uppercase tracking-widest mb-2 backdrop-blur-md">
+                    <Users className="w-3 h-3" /> Community
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-1 shadow-sm drop-shadow-lg">Mega Seminars</h3>
+                  <p className="text-sm text-gray-300 drop-shadow-md">Learn from top leaders in massive company events.</p>
+                </div>
+              </div>
+
+              {/* Rewards & Recognition Image */}
+              <div className="relative rounded-3xl overflow-hidden group shadow-xl h-[300px] border border-[#28485A]/40">
+                <div className="absolute inset-0 bg-[#071E2C]/30 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
+                <img 
+                  src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=1000&auto=format&fit=crop" 
+                  alt="Rewards & Recognition" 
+                  className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
+                <div className="absolute bottom-0 left-0 p-5 md:p-6 z-30">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1B3343]/80 border border-[#D99A4A]/30 text-[#D99A4A] text-[10px] font-bold uppercase tracking-widest mb-2 backdrop-blur-md">
+                    <Star className="w-3 h-3" /> Recognition
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-1 shadow-sm drop-shadow-lg">Rewards & Awards</h3>
+                  <p className="text-sm text-gray-300 drop-shadow-md">Celebrating top achievers on the grand stage.</p>
+                </div>
+              </div>
+
+              {/* Financial Freedom / Dream Lifestyle Image */}
+              <div className="relative rounded-3xl overflow-hidden group shadow-xl h-[300px] border border-[#28485A]/40">
+                <div className="absolute inset-0 bg-[#071E2C]/40 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
+                <img 
+                  src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop" 
+                  alt="Financial Freedom Lifestyle" 
+                  className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
+                <div className="absolute bottom-0 left-0 p-5 md:p-6 z-30">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1B3343]/80 border border-[#6F9DB5]/30 text-[#6F9DB5] text-[10px] font-bold uppercase tracking-widest mb-2 backdrop-blur-md">
+                    <Sparkles className="w-3 h-3" /> Lifestyle
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-1 shadow-sm drop-shadow-lg">Financial Freedom</h3>
+                  <p className="text-sm text-gray-300 drop-shadow-md">Unlock the luxury life of your dreams.</p>
+                </div>
+              </div>
+
             </div>
           </div>
 

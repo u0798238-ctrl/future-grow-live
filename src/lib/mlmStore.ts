@@ -2,14 +2,14 @@ import { INITIAL_LEVELS } from '../pages/admin/LevelIncomePage';
 import { pushMlmStateToFirebase } from './firebase';
 import { pushMlmStateToSupabase as rawPushSupabase } from './supabase';
 
-export const pushMlmStateToSupabase = (key: string, value: any) => {
+export const pushMlmStateToSupabase = async (key: string, value: any) => {
   try {
-    rawPushSupabase(key, value);
+    await rawPushSupabase(key, value);
   } catch (e) {
     console.warn('Supabase sync note:', e);
   }
   try {
-    pushMlmStateToFirebase(key, value);
+    await pushMlmStateToFirebase(key, value);
   } catch (e) {
     console.warn('Firebase sync note:', e);
   }
@@ -1131,7 +1131,7 @@ export const validatePaymentScreenshot = (screenshot: string, excludeUserId?: st
   return { valid: true };
 };
 
-export const addMlmUser = (data: AddMlmUserPayload): MlmUser => {
+export const addMlmUser = async (data: AddMlmUserPayload): Promise<MlmUser> => {
    let users = getMlmUsers();
    
    // Enforce UTR and Payment Screenshot validation if not manual admin override with bypass keyword
@@ -1344,7 +1344,7 @@ export const addMlmUser = (data: AddMlmUserPayload): MlmUser => {
    // Recalculate tree stats and persist
    users = recalculateTreeStats(users);
 
-   localStorage.setItem('mlm_users', JSON.stringify(users)); pushMlmStateToSupabase('mlm_users', users);
+   localStorage.setItem('mlm_users', JSON.stringify(users)); await pushMlmStateToSupabase('mlm_users', users);
    window.dispatchEvent(new Event('mlm_update'));
    window.dispatchEvent(new Event('current_user_change'));
    return newUser;
@@ -2009,4 +2009,9 @@ export const syncAllDataToCloud = async (): Promise<boolean> => {
     console.error('Error syncing all data to cloud:', err);
     return false;
   }
+};
+
+export const forceSyncUsers = async () => {
+   const users = getMlmUsers();
+   await pushMlmStateToSupabase('mlm_users', users);
 };

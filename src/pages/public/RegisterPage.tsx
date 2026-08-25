@@ -206,7 +206,7 @@ export function RegisterPage() {
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
 
@@ -328,7 +328,7 @@ export function RegisterPage() {
       const pkgAmount = currentSelectedPkg.price;
       const pkgName = currentSelectedPkg.name;
 
-      const newUser = addMlmUser({
+      const newUser = await addMlmUser({
         name: fullName.trim(),
         username: username.trim() || undefined,
         mobile: mobile.trim(),

@@ -1,0 +1,136 @@
+  const handleWithdraw = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setToastMessage(null); // Reset previous message
+
+    if (isFreeOrInactive) {
+      setToastMessage({
+        type: 'error',
+        title: 'Withdrawal Locked',
+        text: 'Your account is currently registered as a Free ID (Zero Commission). Please activate your account with package payment to enable withdrawals.'
+      });
+      return;
+    }
+
+    if (isWeekend) {
+      setToastMessage({
+        type: 'error',
+        title: 'Weekend Restriction',
+        text: 'Withdrawals are CLOSED on Saturday and Sunday! Requests are accepted from Monday to Friday only.'
+      });
+      return;
+    }
+
+    if (!isWithdrawalAllowedByAdmin) {
+      setToastMessage({
+        type: 'error',
+        title: 'Withdrawal Blocked',
+        text: 'Withdrawals have been paused for your account by Admin. Please contact support.'
+      });
+      return;
+    }
+
+    if (!hasPanCard && !isAdminNoPanApproved) {
+      setToastMessage({
+        type: 'error',
+        title: 'PAN Card Required',
+        text: 'According to Future Grow policy, if you do not have a PAN Card, withdrawal can only be initiated if Admin enables it. Please submit your PAN Card in KYC.'
+      });
+      return;
+    }
+
+    const withdrawAmt = Number(amount);
+    
+    if (isNaN(withdrawAmt) || withdrawAmt < minW) {
+      setToastMessage({ type: 'error', text: `Minimum withdrawal amount is ₹${minW.toLocaleString('en-IN')}.` });
+      return;
+    }
+    if (withdrawAmt > maxW) {
+      setToastMessage({ type: 'error', text: `Maximum withdrawal limit is ₹${maxW.toLocaleString('en-IN')} per request.` });
+      return;
+    }
+    if (!userStats || withdrawAmt > userStats.availableBalance) {
+      setToastMessage({ type: 'error', text: "Insufficient available balance in your wallet." });
+      return;
+    }
+
+    // STRICT UPI VALIDATION
+    if (method === 'upi') {
+      if (!upiId.trim()) {
+        setToastMessage({ type: 'error', text: "UPI ID Required! Please enter your UPI ID." });
+        return;
+      }
+      if (!isValidUpiId(upiId)) {
+        setToastMessage({ type: 'error', text: "Invalid UPI ID Format! Please enter a valid UPI ID (e.g., username@oksbi)." });
+        return;
+      }
+    }
+
+    // STRICT BANK VALIDATION
+    if (method === 'bank') {
+      if (!accountHolderName.trim()) {
+        setToastMessage({ type: 'error', text: "Account Holder Name Required!" });
+        return;
+      }
+      if (!bankAccount.trim() || !isValidBankAccount(bankAccount)) {
+        setToastMessage({ type: 'error', text: "Invalid Bank Account Number! Please enter 9 to 18 digits." });
+        return;
+      }
+      if (!ifscCode.trim() || !isValidIfscCode(ifscCode)) {
+        setToastMessage({ type: 'error', text: "Invalid IFSC Code! Please enter a valid 11-character IFSC code." });
+        return;
+      }
+    }
+
+    const tds = withdrawAmt * (tdsPercent / 100);
+    const adminCharge = withdrawAmt * (adminPercent / 100);
+    const netAmount = withdrawAmt - tds - adminCharge;
+
+    const currentId = getCurrentUserId();
+    const users = getMlmUsers();
+    const me = users.find(u => u.id === currentId);
+    if (me) {
+       me.totalWithdrawn += withdrawAmt; // Deduct from available balance immediately
+       me.availableBalance -= withdrawAmt;
+       
+       me.transactions.push({
+         id: `W-${Date.now()}`,
+         type: 'Withdrawal',
+         amount: withdrawAmt,
+         netAmount: netAmount,
+         tds: tds,
+         adminCharge: adminCharge,
+         status: 'Pending',
+         description: 'Withdrawal',
+         date: new Date().toISOString(),
+         withdrawalMethod: method,
+         upiId: method === 'upi' ? upiId.trim() : undefined,
+         bankAccount: method === 'bank' ? bankAccount.trim() : undefined,
+         ifscCode: method === 'bank' ? ifscCode.trim().toUpperCase() : undefined
+       
+       me.transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+       localStorage.setItem('mlm_users', JSON.stringify(users));
+       
+       // CRITICAL: Push to Cloud immediately so all admin devices sync the deduction!
+       const { pushMlmStateToSupabase } = await import('@/lib/mlmStore');
+           await pushMlmStateToSupabase('mlm_users', users);
+       
+       window.dispatchEvent(new Event('mlm_update'));
+       setAmount('');
+       setToastMessage({
+         type: 'success',
+         title: 'Withdrawal Request Submitted',
+         text: 'Your request has been successfully processed and is pending approval.',
+         details: [
+           `Gross Amount: ₹${withdrawAmt.toLocaleString('en-IN')}`,
+           `Deduction (${totalDeductionPercent}%): ₹${(tds + adminCharge).toLocaleString('en-IN')}`,
+           `Net Payout: ₹${netAmount.toLocaleString('en-IN')}`,
+           `Method: ${method === 'upi' ? 'UPI' : 'Bank Transfer'}`
+         ]
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-semibold text-white">Withdraw Funds</h2>

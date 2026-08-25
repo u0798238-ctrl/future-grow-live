@@ -8,6 +8,7 @@ export function DepositsPage() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [users, setUsers] = useState<MlmUser[]>([]);
   const [selectedDeposit, setSelectedDeposit] = useState<any | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const loadData = () => setUsers(getMlmUsers());
@@ -16,21 +17,30 @@ export function DepositsPage() {
     return () => window.removeEventListener('mlm_update', loadData);
   }, []);
 
-  const handleStatusChange = (userId: string, txId: string, newStatus: string) => {
-    if (newStatus === 'Approved') {
-      activateUserAccount(userId);
-    } else if (newStatus === 'Rejected') {
-      rejectUserAccount(userId);
+  const handleStatusChange = async (userId: string, txId: string, newStatus: string) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      if (newStatus === 'Approved') {
+        activateUserAccount(userId);
+      } else if (newStatus === 'Rejected') {
+        rejectUserAccount(userId);
+      }
+      const { forceSyncUsers } = await import('@/lib/mlmStore');
+      await forceSyncUsers();
+      const allUsers = getMlmUsers();
+      setUsers(allUsers);
+      setSelectedDeposit(null);
+    } finally {
+      setIsSubmitting(false);
     }
-    const allUsers = getMlmUsers();
-    setUsers(allUsers);
-    setSelectedDeposit(null);
   };
 
   const allDeposits = users.flatMap(u => 
     (u.transactions || []).filter(tx => tx.type === 'Deposit').map(tx => ({
       userId: u.id,
       userName: u.name,
+      screenshot: u.paymentProof,
       ...tx
     }))
   ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -195,16 +205,18 @@ export function DepositsPage() {
               {(!selectedDeposit.status || selectedDeposit.status === 'Pending') ? (
                 <>
                   <button 
+                    disabled={isSubmitting}
                     onClick={() => handleStatusChange(selectedDeposit.userId, selectedDeposit.id, 'Rejected')}
                     className="px-4 py-2 bg-red-900/80 hover:bg-red-800 text-white text-sm font-semibold rounded-lg transition-colors border border-red-500/30"
                   >
-                    Reject Deposit
+                    {isSubmitting ? '...' : 'Reject Deposit'}
                   </button>
                   <button 
+                    disabled={isSubmitting}
                     onClick={() => handleStatusChange(selectedDeposit.userId, selectedDeposit.id, 'Approved')}
                     className="px-6 py-2 bg-[#6F9DB5] hover:bg-[#6F9DB5] text-white text-sm font-semibold rounded-lg transition-colors shadow-lg shadow-emerald-900/20"
                   >
-                    Approve & Add Funds
+                    {isSubmitting ? 'Processing...' : 'Approve & Add Funds'}
                   </button>
                 </>
               ) : (
