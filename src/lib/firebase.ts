@@ -127,13 +127,30 @@ export const startFirebaseSync = () => {
   });
 };
 
+
+// Helper to strip undefined values recursively
+const stripUndefined = (obj) => {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(stripUndefined);
+  const newObj = {};
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      newObj[key] = stripUndefined(obj[key]);
+    }
+  }
+  return newObj;
+};
+
 export const pushMlmStateToFirebase = async (key: string, value: any): Promise<boolean> => {
   try {
-    if (key === 'mlm_users' && Array.isArray(value)) {
+    const cleanValue = stripUndefined(value);
+    
+    if (key === 'mlm_users' && Array.isArray(cleanValue)) {
        const colRef = collection(db, 'mlm_users_collection');
+
        const promises = [];
        
-       for (const user of value) {
+       for (const user of cleanValue) {
           if (!user || !user.id) continue;
           
           const userStr = JSON.stringify(user);

@@ -225,6 +225,16 @@ export function WithdrawalPage() {
       return;
     }
 
+    // Check if user already has a pending withdrawal
+    const usersForCheck = getMlmUsers();
+    const meCheck = usersForCheck.find(u => u.id === getCurrentUserId());
+    const hasPendingWithdrawal = meCheck?.transactions?.some(t => t.type === 'Withdrawal' && t.status === 'Pending');
+    
+    if (hasPendingWithdrawal) {
+       setToastMessage({ type: 'error', title: 'Action Not Allowed', text: "You already have a Pending Withdrawal request. Please wait for the admin to approve or reject it before submitting a new one." });
+       return;
+    }
+
     // STRICT UPI VALIDATION
     if (method === 'upi') {
       if (!upiId.trim()) {
@@ -275,9 +285,9 @@ export function WithdrawalPage() {
          description: 'Withdrawal',
          date: new Date().toISOString(),
          withdrawalMethod: method,
-         upiId: method === 'upi' ? upiId.trim() : undefined,
-         bankAccount: method === 'bank' ? bankAccount.trim() : undefined,
-         ifscCode: method === 'bank' ? ifscCode.trim().toUpperCase() : undefined
+         ...(method === 'upi' ? { upiId: upiId.trim() } : {}),
+         ...(method === 'bank' ? { bankAccount: bankAccount.trim() } : {}),
+         ...(method === 'bank' ? { ifscCode: ifscCode.trim().toUpperCase() } : {})
        });
        
        me.transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
