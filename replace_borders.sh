@@ -1,0 +1,16 @@
+#!/bin/bash
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i 's/bg-\[#132C3C\] rounded-2xl border border-\[#28485A\]\/50/bg-\[#132C3C\] rounded-2xl border-2 border-\[#6F9DB5\]\/40 shadow-\[0_0_15px_rgba(111,157,181,0.15)\] hover:border-\[#6F9DB5\] hover:shadow-\[0_0_20px_rgba(111,157,181,0.3)\] transition-all duration-300/g' {} +
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i 's/bg-\[#132C3C\] rounded-2xl border border-\[#28485A\]/bg-\[#132C3C\] rounded-2xl border-2 border-\[#6F9DB5\]\/40 shadow-\[0_0_15px_rgba(111,157,181,0.15)\] hover:border-\[#6F9DB5\] hover:shadow-\[0_0_20px_rgba(111,157,181,0.3)\] transition-all duration-300/g' {} +
+
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i 's/bg-\[#132C3C\] p-5 rounded-2xl border border-\[#28485A\]\/50/bg-\[#132C3C\] p-5 rounded-2xl border-2 border-\[#6F9DB5\]\/40 shadow-\[0_0_15px_rgba(111,157,181,0.15)\] hover:border-\[#6F9DB5\] hover:shadow-\[0_0_20px_rgba(111,157,181,0.3)\] transition-all duration-300/g' {} +
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i 's/bg-\[#132C3C\] p-5 rounded-2xl border border-\[#28485A\]/bg-\[#132C3C\] p-5 rounded-2xl border-2 border-\[#6F9DB5\]\/40 shadow-\[0_0_15px_rgba(111,157,181,0.15)\] hover:border-\[#6F9DB5\] hover:shadow-\[0_0_20px_rgba(111,157,181,0.3)\] transition-all duration-300/g' {} +
+
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i 's/bg-\[#132C3C\] p-6 rounded-2xl border border-\[#28485A\]\/50/bg-\[#132C3C\] p-6 rounded-2xl border-2 border-\[#6F9DB5\]\/40 shadow-\[0_0_15px_rgba(111,157,181,0.15)\] hover:border-\[#6F9DB5\] hover:shadow-\[0_0_20px_rgba(111,157,181,0.3)\] transition-all duration-300/g' {} +
+
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i 's/bg-\[#132C3C\] border border-\[#28485A\]\/50 rounded-2xl/bg-\[#132C3C\] rounded-2xl border-2 border-\[#6F9DB5\]\/40 shadow-\[0_0_15px_rgba(111,157,181,0.15)\] hover:border-\[#6F9DB5\] hover:shadow-\[0_0_20px_rgba(111,157,181,0.3)\] transition-all duration-300/g' {} +
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i 's/bg-\[#132C3C\] border border-\[#28485A\] rounded-2xl/bg-\[#132C3C\] rounded-2xl border-2 border-\[#6F9DB5\]\/40 shadow-\[0_0_15px_rgba(111,157,181,0.15)\] hover:border-\[#6F9DB5\] hover:shadow-\[0_0_20px_rgba(111,157,181,0.3)\] transition-all duration-300/g' {} +
+
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i 's/bg-\[#071E2C\] rounded-2xl border border-\[#28485A\]\/50/bg-\[#071E2C\] rounded-2xl border-2 border-\[#6F9DB5\]\/40 shadow-\[0_0_15px_rgba(111,157,181,0.15)\] hover:border-\[#6F9DB5\] hover:shadow-\[0_0_20px_rgba(111,157,181,0.3)\] transition-all duration-300/g' {} +
+
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i 's/bg-\[#071E2C\] p-4 rounded-xl border border-\[#28485A\]\/40/bg-\[#071E2C\] p-4 rounded-xl border border-\[#6F9DB5\]\/40 shadow-\[0_0_10px_rgba(111,157,181,0.1)\] hover:border-\[#6F9DB5\]\/80 transition-all/g' {} +
+find src -type f \( -name "*.tsx" -o -name "*.ts" \) -exec sed -i 's/bg-\[#071E2C\] p-6 rounded-2xl border border-\[#28485A\]\/50/bg-\[#071E2C\] p-6 rounded-2xl border-2 border-\[#6F9DB5\]\/40 shadow-\[0_0_15px_rgba(111,157,181,0.15)\] hover:border-\[#6F9DB5\] hover:shadow-\[0_0_20px_rgba(111,157,181,0.3)\] transition-all duration-300/g' {} +

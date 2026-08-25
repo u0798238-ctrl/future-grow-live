@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Poppins", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: #071E2C;
+    color: #FFFFFF;
+    font-family: "Poppins", sans-serif;
+  }
+  
+  /* Update scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #071E2C;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1B3343;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #28485A;
+  }
+}

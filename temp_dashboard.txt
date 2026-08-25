@@ -1,0 +1,148 @@
+import React from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Network, Menu, LogOut, LayoutDashboard, Users, Wallet, FileText, Settings, User as UserIcon, GitMerge, ChevronDown, ArrowDownToLine, ArrowUpFromLine, ShieldCheck } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface SidebarItem {
+  name: string;
+  path: string;
+  icon: React.ElementType;
+}
+
+export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const userRoutes: SidebarItem[] = [
+    { name: 'Dashboard', path: '/user/dashboard', icon: LayoutDashboard },
+    { name: 'Invite & Earn', path: '/user/invite', icon: Users },
+    { name: 'My Team', path: '/user/team', icon: Users },
+    { name: 'Binary Tree', path: '/user/tree', icon: GitMerge },
+    { name: 'Withdrawal', path: '/user/withdrawal', icon: ArrowUpFromLine },
+    { name: 'Wallet', path: '/user/wallet', icon: Wallet },
+    { name: 'Profile', path: '/user/profile', icon: UserIcon },
+    { name: 'KYC', path: '/user/kyc', icon: ShieldCheck },
+  ];
+
+  const adminRoutes: SidebarItem[] = [
+    { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Users List', path: '/admin/users', icon: Users },
+    { name: 'Deposits', path: '/admin/deposits', icon: Wallet },
+    { name: 'Withdrawals', path: '/admin/withdrawals', icon: Wallet },
+    { name: 'Level Settings', path: '/admin/settings', icon: Settings },
+  ];
+
+  const routes = type === 'user' ? userRoutes : adminRoutes;
+
+  const handleLogout = () => {
+    navigate('/login');
+  };
+
+  return (
+    <div className="min-h-screen bg-[#011425] flex font-sans text-white">
+      {/* Sidebar Desktop */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 bg-[#242424] border-r border-[#5C7C89]/50 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="p-6 border-b border-[#5C7C89]/30 flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="h-8 w-8 bg-[#1F4959] rounded-lg flex items-center justify-center text-white font-bold">F</div>
+            <span className="text-xl font-bold tracking-tight text-white">Future Grow</span>
+          </Link>
+        </div>
+        <nav className="flex-1 space-y-1 p-4">
+          {routes.map((route) => {
+            const isActive = location.pathname.startsWith(route.path);
+            const Icon = route.icon;
+            return (
+              <Link
+                key={route.name}
+                to={route.path}
+                onClick={() => setIsSidebarOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors",
+                  isActive
+                    ? "bg-[#1F4959]/30 text-[#5C7C89]"
+                    : "text-gray-300 hover:bg-[#011425]"
+                )}
+              >
+                <Icon
+                  className={cn(
+                    "w-5 h-5",
+                    isActive ? "opacity-100" : "opacity-70"
+                  )}
+                  aria-hidden="true"
+                />
+                {route.name}
+              </Link>
+            );
+          })}
+        </nav>
+        {type === 'user' && (
+          <div className="p-4 border-t border-[#5C7C89]/30">
+            <div className="bg-[#011425] text-white p-4 rounded-xl space-y-2">
+              <p className="text-[10px] uppercase tracking-wider text-[#5C7C89]">Current Package</p>
+              <p className="text-lg font-bold">₹8,599 Premium</p>
+              <div className="h-1 w-full bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full w-2/3 bg-green-400"></div>
+              </div>
+              <p className="text-[10px] text-green-400">Status: Fully Active</p>
+            </div>
+          </div>
+        )}
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Top Header */}
+        <header className="h-16 bg-[#242424] border-b border-[#5C7C89]/50 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="mr-4 text-[#5C7C89] hover:text-white lg:hidden"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+            <div>
+              <h2 className="text-sm font-medium text-[#5C7C89]">Welcome back,</h2>
+              <p className="text-lg font-bold text-white">
+                {type === 'user' ? 'John Doe' : 'Super Admin'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleLogout}
+                className="text-[#5C7C89] hover:text-gray-300 flex items-center gap-2"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="hidden sm:inline text-sm font-medium">Logout</span>
+              </button>
+              <div className="w-10 h-10 bg-[#5C7C89]/50 rounded-full flex items-center justify-center text-gray-300">
+                <UserIcon className="h-5 w-5" />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Scrollable Main Area */}
+        <main className="flex-1 overflow-y-auto bg-[#011425] p-4 sm:p-6 lg:p-8">
+          <Outlet />
+        </main>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-[#011425]/80 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+    </div>
+  );
+}

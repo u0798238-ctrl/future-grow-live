@@ -1,0 +1,223 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { CheckCircle, AlertCircle, Save, Building, Phone, Mail, User } from 'lucide-react';
+
+export function ProfilePage() {
+  const [kycStatus, setKycStatus] = useState<'pending' | 'submitted' | 'approved'>('pending');
+  const [formData, setFormData] = useState({
+    bankName: '',
+    accountName: '',
+    accountNumber: '',
+    ifscCode: '',
+    upiId: '',
+    upiName: '',
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleKycSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsSaving(false);
+      setKycStatus('submitted');
+      alert("KYC details submitted successfully for admin approval.");
+    }, 1500);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Profile & KYC</h1>
+          <p className="text-gray-400">Manage your personal information and bank details</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Personal Info */}
+        <div className="lg:col-span-1 space-y-6">
+          <Card className="bg-[#242424] border-[#5C7C89]/30">
+            <CardHeader>
+              <CardTitle className="text-white text-lg">Personal Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-3 text-gray-300">
+                <User className="h-5 w-5 text-[#5C7C89]" />
+                <div>
+                  <p className="text-xs text-gray-500">Full Name</p>
+                  <p className="font-medium text-white">John Doe</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-gray-300">
+                <Mail className="h-5 w-5 text-[#5C7C89]" />
+                <div>
+                  <p className="text-xs text-gray-500">Email Address</p>
+                  <p className="font-medium text-white">john@example.com</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-gray-300">
+                <Phone className="h-5 w-5 text-[#5C7C89]" />
+                <div>
+                  <p className="text-xs text-gray-500">Phone Number</p>
+                  <p className="font-medium text-white">+91 98765 43210</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* KYC & Bank Details */}
+        <div className="lg:col-span-2">
+          <Card className="bg-[#242424] border-[#5C7C89]/30">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-[#5C7C89]/30">
+              <div>
+                <CardTitle className="text-white text-xl">KYC & Payment Details</CardTitle>
+                <CardDescription className="text-gray-400">Add your bank and UPI details for receiving payouts</CardDescription>
+              </div>
+              {kycStatus === 'pending' && (
+                <div className="px-3 py-1 bg-yellow-500/20 text-yellow-500 rounded-full text-xs font-semibold flex items-center gap-1 border border-yellow-500/30">
+                  <AlertCircle className="h-3 w-3" /> Action Required
+                </div>
+              )}
+              {kycStatus === 'submitted' && (
+                <div className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-semibold flex items-center gap-1 border border-blue-500/30">
+                  <AlertCircle className="h-3 w-3" /> Pending Approval
+                </div>
+              )}
+              {kycStatus === 'approved' && (
+                <div className="px-3 py-1 bg-green-500/20 text-green-500 rounded-full text-xs font-semibold flex items-center gap-1 border border-green-500/30">
+                  <CheckCircle className="h-3 w-3" /> Verified
+                </div>
+              )}
+            </CardHeader>
+            <CardContent className="pt-6">
+              <form onSubmit={handleKycSubmit} className="space-y-8">
+                
+                {/* Bank Details */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-[#5C7C89] flex items-center gap-2">
+                    <Building className="h-5 w-5" /> Bank Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-300">Bank Name *</label>
+                      <Input
+                        name="bankName"
+                        value={formData.bankName}
+                        onChange={handleChange}
+                        placeholder="e.g. State Bank of India"
+                        required
+                        disabled={kycStatus === 'submitted' || kycStatus === 'approved'}
+                        className="bg-[#011425] border-[#5C7C89]/50 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-300">Account Holder Name *</label>
+                      <Input
+                        name="accountName"
+                        value={formData.accountName}
+                        onChange={handleChange}
+                        placeholder="As per bank records"
+                        required
+                        disabled={kycStatus === 'submitted' || kycStatus === 'approved'}
+                        className="bg-[#011425] border-[#5C7C89]/50 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-300">Account Number *</label>
+                      <Input
+                        name="accountNumber"
+                        value={formData.accountNumber}
+                        onChange={handleChange}
+                        placeholder="Enter account number"
+                        required
+                        disabled={kycStatus === 'submitted' || kycStatus === 'approved'}
+                        className="bg-[#011425] border-[#5C7C89]/50 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-300">IFSC Code *</label>
+                      <Input
+                        name="ifscCode"
+                        value={formData.ifscCode}
+                        onChange={handleChange}
+                        placeholder="e.g. SBIN0001234"
+                        required
+                        disabled={kycStatus === 'submitted' || kycStatus === 'approved'}
+                        className="bg-[#011425] border-[#5C7C89]/50 text-white uppercase"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* UPI Details */}
+                <div className="space-y-4 pt-4 border-t border-[#5C7C89]/30">
+                  <h3 className="text-lg font-medium text-[#5C7C89] flex items-center gap-2">
+                    <span className="font-bold text-xl leading-none">₹</span> UPI Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-300">UPI ID *</label>
+                      <Input
+                        name="upiId"
+                        value={formData.upiId}
+                        onChange={handleChange}
+                        placeholder="e.g. yourname@ybl"
+                        required
+                        disabled={kycStatus === 'submitted' || kycStatus === 'approved'}
+                        className="bg-[#011425] border-[#5C7C89]/50 text-white"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-300">Name on UPI (Registered Name) *</label>
+                      <Input
+                        name="upiName"
+                        value={formData.upiName}
+                        onChange={handleChange}
+                        placeholder="Name linked to this UPI"
+                        required
+                        disabled={kycStatus === 'submitted' || kycStatus === 'approved'}
+                        className="bg-[#011425] border-[#5C7C89]/50 text-white"
+                      />
+                      <p className="text-xs text-gray-500">The exact name that appears when someone sends you money on this UPI ID.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {kycStatus === 'pending' && (
+                  <div className="pt-4 border-t border-[#5C7C89]/30">
+                    <Button 
+                      type="submit" 
+                      disabled={isSaving}
+                      className="w-full sm:w-auto flex items-center gap-2 bg-[#5C7C89] hover:bg-[#1F4959] text-white"
+                    >
+                      {isSaving ? (
+                        "Submitting..."
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4" />
+                          Submit KYC for Approval
+                        </>
+                      )}
+                    </Button>
+                    <p className="text-xs text-gray-400 mt-3">
+                      Note: Once submitted, your details will be locked for verification. Please double-check before submitting.
+                    </p>
+                  </div>
+                )}
+                
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}

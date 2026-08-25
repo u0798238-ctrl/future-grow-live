@@ -1,0 +1,8 @@
+{
+  "name": "Future Grow ",
+  "description": "A comprehensive network marketing business platform featuring user dashboards, binary tree visualization, wallet management, and admin controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

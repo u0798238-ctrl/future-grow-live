@@ -1,0 +1,48 @@
+{
+  "name": "Future Grow Private Limited",
+  "short_name": "Future Grow",
+  "description": "Future Grow Official Business & MLM Network Portal",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#071E2C",
+  "theme_color": "#132C3C",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open your Member Dashboard",
+      "url": "/user/dashboard",
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Wallet",
+      "short_name": "Wallet",
+      "description": "Check Wallet & Incomes",
+      "url": "/user/wallet",
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Business Plan",
+      "short_name": "Plan",
+      "description": "View Business & Level Income Plan",
+      "url": "/plan",
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
+    }
+  ]
+}
