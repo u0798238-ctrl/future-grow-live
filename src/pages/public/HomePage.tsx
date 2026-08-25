@@ -166,7 +166,7 @@ export function HomePage() {
           </div>
 
           {/* Life at Future Grow - Image Gallery */}
-          <div className="pt-8 pb-4">
+          <div className="pt-8 pb-0">
             <h2 className="text-2xl md:text-3xl font-semibold text-white uppercase tracking-wider text-center mb-10">Life at Future Grow</h2>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 h-auto md:h-[500px]">
               
@@ -229,7 +229,7 @@ export function HomePage() {
           </div>
 
           {/* Mega Events & Rewards - Image Gallery 2 */}
-          <div className="pt-2 pb-12">
+          <div className="pt-4 md:pt-6 pb-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               
               {/* Mega Seminars Image */}

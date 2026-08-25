@@ -80,7 +80,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
           sessionStorage.removeItem('admin_security_unlocked');
           localStorage.removeItem('is_admin_session');
           setIsAdminUnlocked(false);
-          alert(adminValidation.reason || 'Admin logged in from another device. You have been logged out.');
+          // Removed disruptive alert
           navigate('/login');
         }
       }
