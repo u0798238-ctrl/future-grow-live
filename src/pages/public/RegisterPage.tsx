@@ -243,7 +243,7 @@ export function RegisterPage() {
         }
 
         if (age < 18) {
-          setErrorMsg('You must be at least 18 years old to register.');
+          setErrorMsg('You must be at least 18 years old for registration.');
           return;
         }
       } else {
@@ -290,7 +290,7 @@ export function RegisterPage() {
     }
 
     if (!agreedToTerms) {
-      setErrorMsg("You must agree to the Terms & Conditions to register.");
+      setErrorMsg("You must agree to the Terms & Conditions for registration.");
       return;
     }
 
@@ -1157,7 +1157,7 @@ export function RegisterPage() {
             </div>
 
             <Button type="submit" className="w-full mt-6 bg-[#6F9DB5] hover:bg-emerald-700 text-white font-semibold whitespace-normal h-auto py-3 text-sm">
-              {showPayment ? 'Submit Payment & Register Account' : 'Proceed to Payment & Complete Registration'}
+              {showPayment ? 'Submit Payment & Registration' : 'Proceed to Payment & Complete Registration'}
             </Button>
           </form>
         </CardContent>

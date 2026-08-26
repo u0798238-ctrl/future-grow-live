@@ -50,7 +50,7 @@ export function InvitePage() {
   };
 
   const templates = {
-    short: `🚀 *FUTURE GROW - JOIN MY TEAM*\n\nEarn Daily Direct Income (₹1,500) & Binary Matching Income (₹1,000/pair)!\n\n👉 *Direct Join Link:* ${referralLink}\n🔑 *Sponsor ID:* ${sponsorCode}\n\nRegister now and start earning!`,
+    short: `🚀 *FUTURE GROW - JOIN MY TEAM*\n\nEarn Daily Direct Income (₹1,500) & Binary Matching Income (₹1,000/pair)!\n\n👉 *Direct Join Link:* ${referralLink}\n🔑 *Sponsor ID:* ${sponsorCode}\n\nRegistration now and start earning!`,
     hindi: `🌟 *फ्यूचर ग्रो (Future Grow) बिज़नेस अवसर*\n\nनमस्ते! भारत के सबसे तेजी से बढ़ते नेटवर्क में शामिल हों और घर बैठे अनलिमिटेड इनकम कमाएं:\n\n✅ डायरेक्ट इनकम: ₹1,500/जॉइनिंग\n✅ मैचिंग इनकम: ₹1,000/पेयर\n✅ 10-लेवल माइलस्टोन बोनस\n✅ डेली विड्रॉल सीधा बैंक/UPI में\n\n👉 *जॉइनिंग लिंक:* ${referralLink}\n🔑 *स्पॉन्सर आईडी:* ${sponsorCode}\n\nआज ही रजिस्टर करें और टीम का हिस्सा बनें!`,
     english: `💼 *Future Grow Official Business Invitation*\n\nJoin our high-earning binary network today with instant commission distribution and daily payouts.\n\n✨ Direct Income: ₹1,500 (No Capping)\n✨ Binary Matching: ₹1,000 / Pair\n✨ 10-Level Milestone Bonuses\n\n🔗 *Official Registration Link:* ${referralLink}\n👤 *Sponsor Code:* ${sponsorCode}\n\nBest regards,\n${currentUser.name}`
   };

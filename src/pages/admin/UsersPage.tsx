@@ -251,16 +251,25 @@ export function UsersPage() {
     const current = user.commissionSettings?.withdrawalWithoutPanEnabled === true;
     const newStatus = !current;
     
-    updateUserCommissionSettings(user.id, {
-      withdrawalWithoutPanEnabled: newStatus
+    setConfirmDialog({
+      isOpen: true,
+      title: newStatus ? 'Enable No-PAN Withdrawal' : 'Disable No-PAN Withdrawal',
+      text: `Are you sure you want to ${newStatus ? 'ENABLE' : 'DISABLE'} No-PAN Withdrawal for ${user.name} (${user.id})?`,
+      onConfirm: () => {
+        updateUserCommissionSettings(user.id, {
+          withdrawalWithoutPanEnabled: newStatus
+        });
+
+        const updatedUsers = getMlmUsers();
+        setUsers(updatedUsers);
+
+        if (commissionModalUser && commissionModalUser.id === user.id) {
+          setCommissionModalUser(updatedUsers.find(u => u.id === user.id) || null);
+        }
+        setConfirmDialog(null);
+        showToast(`No-PAN Withdrawal ${newStatus ? 'ENABLED' : 'DISABLED'} for ${user.id}`);
+      }
     });
-
-    const updatedUsers = getMlmUsers();
-    setUsers(updatedUsers);
-
-    if (commissionModalUser && commissionModalUser.id === user.id) {
-      setCommissionModalUser(updatedUsers.find(u => u.id === user.id) || null);
-    }
   };
 
   const handleGrantBonus = (e: React.FormEvent) => {
@@ -314,7 +323,15 @@ export function UsersPage() {
   };
 
   const handleQuickActivate = (user: MlmUser) => {
-    openActivateModal(user);
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Activate User ID',
+      text: `Are you sure you want to ACTIVATE User ID ${user.id} (${user.name})? This will generate commissions for their uplines.`,
+      onConfirm: () => {
+        setConfirmDialog(null);
+        openActivateModal(user);
+      }
+    });
   };
 
   const handleQuickReject = (user: MlmUser) => {

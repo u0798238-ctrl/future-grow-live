@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Network, Menu, LogOut, LayoutDashboard, Users, Wallet, FileText, Settings, MessageSquare, Headset, User as UserIcon, GitMerge, ChevronDown, ArrowDownToLine, ArrowUpFromLine, ShieldCheck, Package as PackageIcon, Trophy, UserPlus, Shield, Download, Gift, Medal, Lock, KeyRound, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getCurrentUser, getMlmUsers, setCurrentUserId, MlmUser, getPackageForUser, getSystemSettings } from '@/lib/mlmStore';
+import { getCurrentUser, getMlmUsers, setCurrentUserId, getCurrentUserId, MlmUser, getPackageForUser, getSystemSettings } from '@/lib/mlmStore';
 import { 
   clearActiveUserSession, 
   clearActiveAdminSession,
@@ -21,7 +21,7 @@ interface SidebarItem {
 
 export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<MlmUser>(getCurrentUser());
+  const [currentUser, setCurrentUser] = useState<MlmUser | null>(getCurrentUser());
   const [allUsers, setAllUsers] = useState<MlmUser[]>(getMlmUsers());
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,6 +39,15 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
   useAdminNotifications(type === 'admin' && currentUser?.id === 'FGPL000001');
 
   const loadUserData = () => {
+    const validId = getCurrentUserId();
+    if (!validId) {
+      // Force logout if user was deleted or localstorage is invalid
+      localStorage.removeItem('is_admin_session');
+      localStorage.removeItem('current_user_id');
+      navigate('/login');
+      return;
+    }
+
     const freshUser = getCurrentUser();
     if (freshUser && freshUser.status === 'Blocked') {
       // Force logout if blocked while logged in
@@ -52,16 +61,17 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
       alert('Your account has been blocked by the admin.');
       return;
     }
-    setCurrentUser(freshUser);
+    setCurrentUser(freshUser!);
     setAllUsers(getMlmUsers());
   };
 
   useEffect(() => {
-    const currentSessionId = localStorage.getItem('current_user_id');
+    const validId = getCurrentUserId();
     const isAdminSession = localStorage.getItem('is_admin_session');
     
-    // Auth Check: Redirect if no active session
-    if (!currentSessionId) {
+    // Auth Check: Redirect if no active valid session
+    if (!validId) {
+      localStorage.removeItem('current_user_id');
       navigate('/login');
       return;
     }
@@ -183,17 +193,17 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
 
   const isRootAdmin = currentUser?.id === 'FGPL000001';
 
-  const userPkg = getPackageForUser(currentUser);
-  const packagePrice = currentUser.paymentAmount ? `₹${currentUser.paymentAmount.toLocaleString('en-IN')}` : `₹${userPkg.price.toLocaleString('en-IN')}`;
-  const packageName = userPkg.name;
-
   // Session check before rendering anything
   const currentSessionId = localStorage.getItem('current_user_id');
   const isAdminSession = localStorage.getItem('is_admin_session');
 
-  if (!currentSessionId || (type === 'admin' && isAdminSession !== 'true')) {
+  if (!currentUser || !currentSessionId || (type === 'admin' && isAdminSession !== 'true')) {
     return null; // Will redirect in useEffect
   }
+
+  const userPkg = getPackageForUser(currentUser);
+  const packagePrice = currentUser.paymentAmount ? `₹${currentUser.paymentAmount.toLocaleString('en-IN')}` : `₹${userPkg.price.toLocaleString('en-IN')}`;
+  const packageName = userPkg.name;
 
   // If user tries to open /admin/* without being the 1st ID (FGPL000001)
   if (type === 'admin' && !isRootAdmin) {

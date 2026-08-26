@@ -1,6 +1,6 @@
 import { INITIAL_LEVELS } from '../pages/admin/LevelIncomePage';
-import { pushMlmStateToFirebase } from './firebase';
-import { pushMlmStateToSupabase as rawPushSupabase } from './supabase';
+import { pushMlmStateToFirebase, deleteUserFromCloud } from './firebase';
+import { pushMlmStateToSupabase as rawPushSupabase, deleteUserFromSupabase } from './supabase';
 
 export const pushMlmStateToSupabase = async (key: string, value: any) => {
   try {
@@ -614,50 +614,31 @@ export const getMlmUsers = (): MlmUser[] => {
    }];
 };
 
-export const getCurrentUserId = (): string => {
+export const getCurrentUserId = (): string | null => {
    const current = localStorage.getItem('current_user_id');
    const users = getMlmUsers();
    if (current && users.some(u => u.id === current)) {
       return current;
    }
-   return users[0]?.id || 'FGPL000001';
+   return null;
 };
 
-export const setCurrentUserId = (id: string) => {
-   localStorage.setItem('current_user_id', id);
+export const setCurrentUserId = (id: string | null) => {
+   if (id) {
+       localStorage.setItem('current_user_id', id);
+   } else {
+       localStorage.removeItem('current_user_id');
+   }
    window.dispatchEvent(new Event('current_user_change'));
    window.dispatchEvent(new Event('mlm_update'));
 };
 
-export const getCurrentUser = (): MlmUser => {
+export const getCurrentUser = (): MlmUser | null => {
    const users = getMlmUsers();
    const currentId = getCurrentUserId();
+   if (!currentId) return null;
    const found = users.find(u => u.id === currentId);
-   if (found) return found;
-   return users[0] || {
-      id: 'FGPL000001',
-      name: 'User',
-      mobile: '',
-      package: 'Premium',
-      status: 'Active',
-      joined: '2023-10-01',
-      sponsorId: null,
-      parentId: null,
-      position: null,
-      leftId: null,
-      rightId: null,
-      availableBalance: 0,
-      totalIncome: 0,
-      matchingIncome: 0,
-      directIncome: 0,
-      levelIncome: 0,
-      totalWithdrawn: 0,
-      completedPairs: 0,
-      directJoins: 0,
-      leftMembers: 0,
-      rightMembers: 0,
-      transactions: []
-   };
+   return found || null;
 };
 
 export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
@@ -1032,20 +1013,20 @@ export const validateUtrNumber = (utr: string, excludeUserId?: string): { valid:
     if (excludeUserId && user.id === excludeUserId) continue;
 
     // Check user's registration utr
-    if (user.utrNumber && user.utrNumber.trim().toLowerCase() === lower) {
+    if (user.paymentStatus !== 'Rejected' && user.utrNumber && user.utrNumber.trim().toLowerCase() === lower) {
       return { 
         valid: false, 
-        error: `This Transaction ID / UTR (${trimmed}) has already been used and approved for User ${user.id} (${user.name}). Reusing approved transactions is strictly prohibited.` 
+        error: `This Transaction ID / UTR (${trimmed}) has already been used by User ${user.id} (${user.name}). Reusing transactions is strictly prohibited.` 
       };
     }
 
     // Check all user transaction records
     if (user.transactions && user.transactions.length > 0) {
       for (const tx of user.transactions) {
-        if (tx.utr && tx.utr.trim().toLowerCase() === lower) {
+        if (tx.status !== 'Rejected' && tx.utr && tx.utr.trim().toLowerCase() === lower) {
           return { 
             valid: false, 
-            error: `This Transaction ID / UTR (${trimmed}) has already been registered and verified in our database. Duplicate transaction entries cannot be accepted.` 
+            error: `This Transaction ID / UTR (${trimmed}) has already been registered in our database. Duplicate transaction entries cannot be accepted.` 
           };
         }
       }
@@ -1074,7 +1055,7 @@ export const validatePaymentScreenshot = (screenshot: string, excludeUserId?: st
     return { valid: false, error: 'The uploaded file appears corrupted or too small. Please upload a full, clear screenshot of the payment receipt.' };
   }
 
-  // Duplicate screenshot check against previously uploaded and approved screenshots
+  // Duplicate screenshot check against previously uploaded screenshots
   const users = getMlmUsers();
   // Extract a signature slice of the image to compare (first 300 chars of base64 data)
   const incomingSample = trimmed.slice(50, 400);
@@ -1082,24 +1063,24 @@ export const validatePaymentScreenshot = (screenshot: string, excludeUserId?: st
   for (const user of users) {
     if (excludeUserId && user.id === excludeUserId) continue;
 
-    if (user.paymentProof && user.paymentProof.startsWith('data:image/')) {
+    if (user.paymentStatus !== 'Rejected' && user.paymentProof && user.paymentProof.startsWith('data:image/')) {
       const existingSample = user.paymentProof.slice(50, 400);
       if (existingSample === incomingSample || user.paymentProof === trimmed) {
         return {
           valid: false,
-          error: `This Payment Screenshot has already been uploaded and approved for Member ${user.id} (${user.name}). Reusing the same screenshot for multiple accounts is strictly prohibited.`
+          error: `This Payment Screenshot has already been uploaded for Member ${user.id} (${user.name}). Reusing the same screenshot for multiple accounts is strictly prohibited.`
         };
       }
     }
 
     if (user.transactions) {
       for (const tx of user.transactions) {
-        if (tx.screenshot && tx.screenshot.startsWith('data:image/')) {
+        if (tx.status !== 'Rejected' && tx.screenshot && tx.screenshot.startsWith('data:image/')) {
           const existingSample = tx.screenshot.slice(50, 400);
           if (existingSample === incomingSample || tx.screenshot === trimmed) {
             return {
               valid: false,
-              error: `This Payment Screenshot has already been submitted and verified for transaction ${tx.id}. Duplicate payment screenshots cannot be accepted.`
+              error: `This Payment Screenshot has already been submitted for a transaction (${tx.id}). Duplicate payment screenshots cannot be accepted.`
             };
           }
         }
@@ -1535,6 +1516,15 @@ export const deleteMlmUser = (userId: string) => {
    // 11. Recalculate tree and save
    users = recalculateTreeStats(users);
    localStorage.setItem('mlm_users', JSON.stringify(users)); 
+   
+   // Actually remove from cloud databases so it doesn't reappear
+   try {
+       deleteUserFromCloud(userId);
+       deleteUserFromSupabase(userId);
+   } catch (e) {
+       console.error('Cloud delete error:', e);
+   }
+
    pushMlmStateToSupabase('mlm_users', users);
    pushMlmStateToFirebase('mlm_users', users);
    

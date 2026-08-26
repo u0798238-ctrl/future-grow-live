@@ -105,7 +105,7 @@ export function LoginPage() {
       return;
     }
 
-    setError('No account found with this Email or Username. Please verify your details or register a new account.');
+    setError('No account found with this Email or Username. Please verify your details or do registration for a new account.');
   };
 
   const handleAdminSecuritySubmit = (e: React.FormEvent) => {
@@ -292,7 +292,7 @@ export function LoginPage() {
             <p className="text-center text-sm text-white">
               Don't have an account?{' '}
               <Link to="/register" className="font-semibold text-[#35B779] hover:text-emerald-300">
-                Register now
+                Registration now
               </Link>
             </p>
 

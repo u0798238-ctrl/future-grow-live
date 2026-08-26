@@ -63,7 +63,7 @@ export function PublicLayout() {
                   to="/register"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:pointer-events-none disabled:opacity-50 bg-[#1B3343] text-white hover:bg-[#28485A] h-9 px-4 py-2"
                 >
-                  Register Now
+                  Registration Now
                 </Link>
               </div>
 
