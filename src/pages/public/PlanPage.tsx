@@ -59,11 +59,12 @@ export function PlanPage() {
 
                 const defaultChoices = !isPremium ? [
                   { name: 'Suit Length (navy blue Colour - Single Set)', comingSoon: false },
-                  { name: 'Pant (navy blue Colour - Single Set)', comingSoon: false },
+                  { name: 'Vanarsi Sadi - Single Set', comingSoon: false },
                   { name: 'Healthcare & Wellness Package', comingSoon: true }
                 ] : [
-                  { name: 'Suit Length & Pant (Green Colour)', comingSoon: false },
                   { name: 'Suit Length & Pant (Navy Blue Colour)', comingSoon: false },
+                  { name: 'Suit Length & Vanarsi Sadi', comingSoon: false },
+                  { name: 'Double Set Vanarsi Sadi', comingSoon: false }
                 ];
 
                 const productList = pkg.productChoices && pkg.productChoices.length > 0
@@ -80,13 +81,20 @@ export function PlanPage() {
                       isPremium ? 'border-[#35B779]/40' : 'border-[#6F9DB5]/40'
                     }`}
                   >
-                    <div className={`inline-block px-2.5 py-0.5 font-bold text-[11px] rounded-full uppercase mb-2 ${
-                      isPremium ? 'bg-[#35B779]/20 text-[#35B779]' : 'bg-[#6F9DB5]/20 text-[#6F9DB5]'
-                    }`}>
-                      {isPremium ? '★ ' : ''}{pkg.name} Package
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                      <div className={`inline-block px-2.5 py-0.5 font-bold text-[11px] rounded-full uppercase ${
+                        isPremium ? 'bg-[#35B779]/20 text-[#35B779]' : 'bg-[#6F9DB5]/20 text-[#6F9DB5]'
+                      }`}>
+                        {isPremium ? '★ ' : ''}{pkg.name} Package
+                      </div>
+                      <div className="inline-flex items-center gap-1 px-2.5 py-0.5 font-bold text-[10px] rounded-full uppercase bg-amber-400/15 text-amber-300 border border-amber-400/30">
+                        <CheckCircle2 className="w-3 h-3 text-amber-300" />
+                        Lifetime Plan
+                      </div>
                     </div>
                     <div className={`text-2xl md:text-3xl font-bold mb-3 ${isPremium ? 'text-[#35B779]' : 'text-[#6F9DB5]'}`}>
                       ₹{breakdown.totalPayable.toLocaleString('en-IN')}
+                      <span className="text-xs font-normal text-gray-300 ml-2">(Lifetime Membership)</span>
                     </div>
                     <div className="space-y-1.5 text-xs font-medium text-white">
                       <div className="flex justify-between border-b border-[#28485A]/20 pb-1.5">

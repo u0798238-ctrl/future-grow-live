@@ -46,14 +46,15 @@ export function RegisterPage() {
   const currentSelectedPkg = availablePackages.find(p => p.id === selectedPackageId) || availablePackages[0] || {
     id: 1,
     name: 'Premium',
-    price: 6699,
+    price: 8599,
     directIncome: 1500,
     binaryIncome: 1000,
     capping: 10000,
     status: 'Active',
     productChoices: [
-      'Suit Length & Pant (Green Colour)',
       'Suit Length & Pant (Navy Blue Colour)',
+      'Suit Length & Vanarsi Sadi',
+      'Double Set Vanarsi Sadi'
     ]
   };
 
@@ -62,11 +63,12 @@ export function RegisterPage() {
     const isBasic = pkg.name.toLowerCase().includes('basic') || pkg.price === 6699;
     const defaultChoices = isBasic ? [
       { name: 'Suit Length (navy blue Colour - Single Set)', comingSoon: false },
-      { name: 'Pant (Green Colour - Single Set)', comingSoon: false },
+      { name: 'Vanarsi Sadi - Single Set', comingSoon: false },
       { name: 'Healthcare & Wellness Package', comingSoon: true }
     ] : [
-      { name: 'Suit Length & Pant (Green Colour)', comingSoon: false },
       { name: 'Suit Length & Pant (Navy Blue Colour)', comingSoon: false },
+      { name: 'Suit Length & Vanarsi Sadi', comingSoon: false },
+      { name: 'Double Set Vanarsi Sadi', comingSoon: false }
     ];
 
     const productList = pkg.productChoices && pkg.productChoices.length > 0 
@@ -843,8 +845,11 @@ export function RegisterPage() {
                                 className="w-4 h-4 text-[#35B779] focus:ring-[#35B779] bg-transparent border-[#28485A] mt-0.5 sm:mt-0 cursor-pointer"
                               />
                               <div>
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1.5 flex-wrap">
                                   <span className="font-bold text-white text-sm sm:text-base">{pkg.name} Package</span>
+                                  <span className="text-[9px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 px-1.5 py-0.2 rounded uppercase tracking-wider">
+                                    Lifetime
+                                  </span>
                                   {isSelected && (
                                     <span className="text-[9px] font-bold bg-[#35B779] text-gray-950 px-1.5 py-0.2 rounded uppercase tracking-wider">
                                       Active

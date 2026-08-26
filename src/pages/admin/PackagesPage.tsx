@@ -78,10 +78,19 @@ export function PackagesPage() {
       binaryIncome: binaryNum,
       capping: cappingNum,
       status: formData.status,
-      productChoices: editingPackage?.productChoices || [
-        'Suit Length & Pant (Navy Blue Colour)',
-        'Suit Length & Pant (Green Colour)',
-      ]
+      productChoices: editingPackage?.productChoices || (
+        formData.name.toLowerCase().includes('basic') || priceNum === 6699
+          ? [
+              'Suit Length (navy blue Colour - Single Set)',
+              'Vanarsi Sadi - Single Set',
+              'Healthcare & Wellness Package'
+            ]
+          : [
+              'Suit Length & Pant (Navy Blue Colour)',
+              'Suit Length & Vanarsi Sadi',
+              'Double Set Vanarsi Sadi'
+            ]
+      )
     };
 
     saveMlmPackage(pkgToSave);

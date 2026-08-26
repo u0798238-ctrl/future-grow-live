@@ -128,7 +128,7 @@ export function UsersPage() {
         position: addFormData.position || 'Left',
         password: addFormData.password?.trim() || '123456',
         utrNumber: isFree ? freeUtr : (addFormData.utrNumber?.trim() || 'MANUAL_ADMIN_ADD'),
-        paymentAmount: isFree ? 0 : ((addFormData.package?.includes('Basic') || addFormData.package?.includes('6699')) ? 6699 : 6699),
+        paymentAmount: isFree ? 0 : ((addFormData.package?.includes('Basic') || addFormData.package?.includes('6699')) ? 6699 : 8599),
         status: isFree ? 'Active' : addFormData.status,
         isFreeId: isFree,
         insertInBetween: isBetween,
@@ -293,7 +293,7 @@ export function UsersPage() {
 
   const handleConfirmActivate = () => {
     if (!activateModalUser) return;
-    const pkgPrice = activatePackage === 'Basic' ? 6699 : 6699;
+    const pkgPrice = activatePackage === 'Basic' ? 6699 : 8599;
     activateUserAccount(activateModalUser.id, {
       package: activatePackage,
       selectedProduct: activateProduct,
@@ -1559,7 +1559,6 @@ export function UsersPage() {
                   </div>
                 </div>
 
-                {/* Product Selection */}
                 <div>
                   <label className="text-xs font-semibold text-gray-300 block mb-1.5">Delivered Product *</label>
                   <select
@@ -1567,10 +1566,19 @@ export function UsersPage() {
                     onChange={(e) => setActivateProduct(e.target.value)}
                     className="w-full bg-[#071E2C] border border-[#28485A]/50 p-2.5 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-400"
                   >
-                    <option value="Suit Length & Pant (Navy Blue Colour)">Suit Length & Pant (Navy Blue Colour)</option>
-                    <option value="Suit Length & Pant (Green Colour)">Suit Length & Pant (Green Colour)</option>
-                    <option value="Suit Length & Pant (Black Colour)">Suit Length & Pant (Black Colour)</option>
-                    <option value="Suit Length (Single Piece)">Suit Length (Single Piece)</option>
+                    {activatePackage === 'Basic' ? (
+                      <>
+                        <option value="Suit Length (navy blue Colour - Single Set)">Suit Length (navy blue Colour - Single Set)</option>
+                        <option value="Vanarsi Sadi - Single Set">Vanarsi Sadi - Single Set</option>
+                        <option value="Healthcare & Wellness Package" disabled>Healthcare & Wellness Package (Coming Soon)</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="Suit Length & Pant (Navy Blue Colour)">Suit Length & Pant (Navy Blue Colour)</option>
+                        <option value="Suit Length & Vanarsi Sadi">Suit Length & Vanarsi Sadi</option>
+                        <option value="Double Set Vanarsi Sadi">Double Set Vanarsi Sadi</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
@@ -1938,7 +1946,9 @@ export function UsersPage() {
                           value={addFormData.package}
                           onChange={(e) => {
                             const newPkg = e.target.value;
-                            const defaultProd = newPkg === 'Basic' ? 'Shuit lanth (Single Piece)' : 'Shuit lanth & paint';
+                            const defaultProd = newPkg === 'Basic' 
+                              ? 'Suit Length (navy blue Colour - Single Set)' 
+                              : 'Suit Length & Pant (Navy Blue Colour)';
                             setAddFormData({...addFormData, package: newPkg, selectedProduct: defaultProd});
                           }}
                           className="w-full bg-[#071E2C] border border-[#28485A]/50 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-[#6F9DB5]"
@@ -1970,13 +1980,14 @@ export function UsersPage() {
                         {addFormData.package === 'Basic' ? (
                           <>
                             <option value="Suit Length (navy blue Colour - Single Set)">1. Suit Length (navy blue Colour - Single Set)</option>
-                            <option value="Pant (Green Colour - Single Set)">2. Pant (Green Colour - Single Set)</option>
-                            <option value="Healthcare & Wellness Package" disabled>4. Healthcare & Wellness Package (Coming Soon)</option>
+                            <option value="Vanarsi Sadi - Single Set">2. Vanarsi Sadi - Single Set</option>
+                            <option value="Healthcare & Wellness Package" disabled>3. Healthcare & Wellness Package (Coming Soon)</option>
                           </>
                         ) : (
                           <>
-                            <option value="Suit Length & Pant (Green Colour)">1. Suit Length & Pant (Green Colour)</option>
-                            <option value="Suit Length & Pant (Navy Blue Colour)">2. Suit Length & Pant (Navy Blue Colour)</option>
+                            <option value="Suit Length & Pant (Navy Blue Colour)">1. Suit Length & Pant (Navy Blue Colour)</option>
+                            <option value="Suit Length & Vanarsi Sadi">2. Suit Length & Vanarsi Sadi</option>
+                            <option value="Double Set Vanarsi Sadi">3. Double Set Vanarsi Sadi</option>
                           </>
                         )}
                       </select>

@@ -195,6 +195,20 @@ export const INITIAL_AWARDED_GIFTS: AwardedGift[] = [
 
 export const DEFAULT_PACKAGES: MlmPackage[] = [
   { 
+    id: 1, 
+    name: 'Premium', 
+    price: 8599, 
+    directIncome: 1500, 
+    binaryIncome: 1000, 
+    capping: 10000, 
+    status: 'Active',
+    productChoices: [
+      'Suit Length & Pant (Navy Blue Colour)',
+      'Suit Length & Vanarsi Sadi',
+      'Double Set Vanarsi Sadi'
+    ]
+  },
+  { 
     id: 2, 
     name: 'Basic', 
     price: 6699, 
@@ -204,7 +218,7 @@ export const DEFAULT_PACKAGES: MlmPackage[] = [
     status: 'Active',
     productChoices: [
       'Suit Length (navy blue Colour - Single Set)',
-      'Pant (navy blue Colour - Single Set)',
+      'Vanarsi Sadi - Single Set',
       'Healthcare & Wellness Package'
     ]
   },
@@ -212,7 +226,7 @@ export const DEFAULT_PACKAGES: MlmPackage[] = [
 
 export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   registrationOpen: true,
-  defaultFee: 6699,
+  defaultFee: 8599,
   directIncome: 1500,
   binaryMatching: 1000,
   dailyCappingPairs: 10,
@@ -225,42 +239,28 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
 
 export const getMlmPackages = (): MlmPackage[] => {
   try {
+    // Migration check: ensure both 8599 (Premium) and 6699 (Basic) exist with updated products
+    const migrationKey = 'mlm_pkg_restore_8599_6699_saree_v11';
+    const isMigrated = localStorage.getItem(migrationKey);
+
+    if (!isMigrated) {
+      localStorage.setItem('mlm_packages', JSON.stringify(DEFAULT_PACKAGES));
+      localStorage.setItem(migrationKey, 'true');
+      return DEFAULT_PACKAGES;
+    }
+
     const raw = localStorage.getItem('mlm_packages');
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        let updated = parsed.filter(p => p.price !== 8599 && !p.name.includes('Premium'));
-        const v7Done = localStorage.getItem('mlm_pkg_v7_pant_blue_update');
-        if (!v7Done) {
-          updated = updated.map((p: MlmPackage) => {
-            if (p.price === 6699 || p.name.toLowerCase() === 'basic') {
-              return { 
-                ...p, 
-                directIncome: 0, 
-                binaryIncome: 1000, 
-                capping: 5000,
-                productChoices: [
-                  'Suit Length (navy blue Colour - Single Set)',
-                  'Pant (navy blue Colour - Single Set)',
-                  'Healthcare & Wellness Package'
-                ]
-              };
-            }
-            return p;
-          });
-          localStorage.setItem('mlm_packages', JSON.stringify(updated));
-          localStorage.setItem('mlm_pkg_v7_pant_blue_update', 'true');
+        // Ensure both packages are present in the list
+        const has8599 = parsed.some(p => p.price === 8599 || p.name?.toLowerCase().includes('premium'));
+        const has6699 = parsed.some(p => p.price === 6699 || p.name?.toLowerCase().includes('basic'));
+        if (!has8599 || !has6699) {
+          localStorage.setItem('mlm_packages', JSON.stringify(DEFAULT_PACKAGES));
+          return DEFAULT_PACKAGES;
         }
-        
-        // Ensure 8599 is purged
-        const purge8599 = localStorage.getItem('mlm_purge_8599');
-        if (!purge8599) {
-           updated = updated.filter(p => p.price !== 8599 && !p.name.includes('Premium'));
-           localStorage.setItem('mlm_packages', JSON.stringify(updated));
-           localStorage.setItem('mlm_purge_8599', 'true');
-        }
-        
-        return updated;
+        return parsed;
       }
     }
   } catch (e) {
@@ -271,11 +271,11 @@ export const getMlmPackages = (): MlmPackage[] => {
 };
 
 export const getPackagePriceBreakdown = (price: number) => {
-  if (price === 6699) {
+  if (price === 8599) {
     return {
       baseAmount: 7052.00,
       gstAmount: 1547.00,
-      totalPayable: 6699.00,
+      totalPayable: 8599.00,
       gstLabel: 'GST'
     };
   }
