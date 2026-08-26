@@ -121,14 +121,12 @@ export const pushMlmStateToSupabase = async (key: string, value: any): Promise<b
     };
 
     // 1. Save to generic table
-    if (key !== 'mlm_users') {
-      const { error } = await supabase
-        .from('mlm_app_data')
-        .upsert(payload, { onConflict: 'key_name' });
+    const { error } = await supabase
+      .from('mlm_app_data')
+      .upsert(payload, { onConflict: 'key_name' });
 
-      if (error) {
-        console.info(`Supabase sync note for [${key}]:`, error.message);
-      }
+    if (error) {
+      console.info(`Supabase sync note for [${key}]:`, error.message);
     }
 
     // 2. If it is users list, also attempt individual user upsert into `users` table
@@ -181,6 +179,16 @@ export const pushMlmStateToSupabase = async (key: string, value: any): Promise<b
     return true;
   } catch (err: any) {
     console.info(`Supabase background sync [${key}]:`, err?.message || err);
+    return false;
+  }
+};
+
+export const deleteUserFromSupabase = async (userId: string): Promise<boolean> => {
+  try {
+    await supabase.from('users').delete().eq('id', userId);
+    return true;
+  } catch (err) {
+    console.info('Supabase delete user notice:', err);
     return false;
   }
 };

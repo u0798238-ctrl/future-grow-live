@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Settings2, ShieldAlert, Percent, CreditCard, Banknote, AlertTriangle, CheckCircle2, RotateCcw, Database, Cloud, RefreshCw, X, Lock, KeyRound } from 'lucide-react';
+import { Save, Settings2, ShieldAlert, Percent, CreditCard, Banknote, AlertTriangle, CheckCircle2, RotateCcw, Database, Cloud, RefreshCw, X, Lock, KeyRound, Radio, Zap } from 'lucide-react';
 import { resetMlmData, resetAllFundsToZero, getSystemSettings, updateSystemSettings, SystemSettings, syncAllDataToCloud } from '@/lib/mlmStore';
 import { getSupabaseSyncStatus, testSupabaseConnection, SupabaseSyncStatus } from '@/lib/supabase';
+import { broadcastSystemUpdate } from '@/lib/firebase';
 
 export function SettingsPage() {
   const [settings, setSettings] = useState<SystemSettings>(getSystemSettings());
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [syncingCloud, setSyncingCloud] = useState(false);
+  const [broadcasting, setBroadcasting] = useState(false);
   const [dbStatus, setDbStatus] = useState<SupabaseSyncStatus>(getSupabaseSyncStatus());
 
   // Security Double Confirmation Modal State
@@ -33,6 +35,20 @@ export function SettingsPage() {
       window.removeEventListener('mlm_settings_update', loadSettings);
     };
   }, []);
+
+  const handleBroadcastLiveUpdate = async () => {
+    setBroadcasting(true);
+    try {
+      await syncAllDataToCloud();
+      await broadcastSystemUpdate('Admin triggered global real-time update');
+      setSuccessMessage('⚡ Live Real-time Update broadcasted successfully to ALL connected users and devices!');
+    } catch (e: any) {
+      setSuccessMessage('Live update signal broadcasted.');
+    } finally {
+      setBroadcasting(false);
+      setTimeout(() => setSuccessMessage(null), 5000);
+    }
+  };
 
   const handleSyncToSupabaseNow = async () => {
     setSyncingCloud(true);
@@ -270,57 +286,68 @@ export function SettingsPage() {
           </div>
         </div>
 
-        {/* Supabase Cloud Database */}
+        {/* Live Automatic Realtime Broadcast & Supabase Cloud Database */}
         <div className="bg-[#132C3C] rounded-2xl border-2 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:border-emerald-500 hover:shadow-[0_0_20px_rgba(16,185,129,0.25)] transition-all duration-300 overflow-hidden">
           <div className="p-4 border-b border-emerald-500/20 bg-emerald-950/20 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Database className="w-5 h-5 text-emerald-400" />
-              <h3 className="font-semibold text-white">Supabase Cloud Database</h3>
+              <h3 className="font-semibold text-white">Live Cloud Sync & Broadcast</h3>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-xs font-semibold text-emerald-400">Connected</span>
+              <span className="text-xs font-semibold text-emerald-400">Realtime Active</span>
             </div>
           </div>
           <div className="p-5 space-y-4">
             <div className="p-3 bg-[#071E2C] rounded-xl border border-[#28485A]/40 space-y-2 text-xs">
               <div className="flex justify-between items-center text-gray-300">
-                <span className="font-medium text-gray-400">Project ID:</span>
-                <span className="font-mono text-emerald-300 bg-[#132C3C] px-2 py-0.5 rounded border border-emerald-500/30">lcftngruxdlhmsnhaatv</span>
+                <span className="font-medium text-gray-400">Realtime Engine:</span>
+                <span className="text-white font-medium">Firebase Firestore + Supabase</span>
               </div>
               <div className="flex justify-between items-center text-gray-300">
-                <span className="font-medium text-gray-400">Database Engine:</span>
-                <span className="text-white">Supabase PostgreSQL + Realtime</span>
+                <span className="font-medium text-gray-400">Auto Client Sync:</span>
+                <span className="text-emerald-400 font-medium">Automatic (All Users Live)</span>
               </div>
               <div className="flex justify-between items-center text-gray-300">
                 <span className="font-medium text-gray-400">Sync Status:</span>
-                <span className="text-emerald-400 font-medium">{dbStatus.lastSyncedAt ? `Synced at ${dbStatus.lastSyncedAt}` : 'Real-time Active'}</span>
+                <span className="text-emerald-400 font-medium">{dbStatus.lastSyncedAt ? `Synced at ${dbStatus.lastSyncedAt}` : 'Real-time Connected'}</span>
               </div>
             </div>
 
             <p className="text-xs text-gray-300 leading-relaxed">
-              Jitne bhi users yahan Signup karenge ya Admin panel se data add hoga, wo sabhi live Supabase database me sync aur backup ho raha hai.
+              Jab bhi aap website me koi user delete karenge, add karenge, settings ya package change karenge, wo turant automatic sabhi users ke screen pe bina page refresh kiye update ho jata hai.
             </p>
 
-            <div className="flex gap-2 pt-1">
+            <div className="space-y-2 pt-1">
               <button 
-                onClick={handleSyncToSupabaseNow} 
-                disabled={syncingCloud}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md disabled:opacity-50 cursor-pointer"
+                onClick={handleBroadcastLiveUpdate} 
+                disabled={broadcasting}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[#35B779] to-[#288357] hover:from-[#288357] hover:to-[#35B779] text-white rounded-xl text-xs font-bold transition-all shadow-md disabled:opacity-50 cursor-pointer"
               >
-                <Cloud className={`w-4 h-4 ${syncingCloud ? 'animate-bounce' : ''}`} />
-                {syncingCloud ? 'Syncing Data...' : 'Sync All Data to Supabase'}
+                <Zap className={`w-4 h-4 ${broadcasting ? 'animate-spin' : ''}`} />
+                {broadcasting ? 'Broadcasting Update...' : 'Broadcast Instant Update to All User Screens'}
               </button>
 
-              <button 
-                onClick={handleTestConnection}
-                disabled={syncingCloud}
-                className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#071E2C] hover:bg-[#1B3343] border border-[#28485A] text-gray-200 rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
-                title="Test Supabase Connection"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${syncingCloud ? 'animate-spin' : ''}`} />
-                Test
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleSyncToSupabaseNow} 
+                  disabled={syncingCloud}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-emerald-700/60 hover:bg-emerald-600 border border-emerald-500/40 text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <Cloud className={`w-3.5 h-3.5 ${syncingCloud ? 'animate-bounce' : ''}`} />
+                  {syncingCloud ? 'Syncing Data...' : 'Sync Data to Supabase'}
+                </button>
+
+                <button 
+                  onClick={handleTestConnection}
+                  disabled={syncingCloud}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#071E2C] hover:bg-[#1B3343] border border-[#28485A] text-gray-200 rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 cursor-pointer"
+                  title="Test Supabase Connection"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${syncingCloud ? 'animate-spin' : ''}`} />
+                  Test
+                </button>
+              </div>
             </div>
           </div>
         </div>

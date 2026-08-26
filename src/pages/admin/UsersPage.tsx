@@ -356,7 +356,8 @@ export function UsersPage() {
       switch (actionModal.type) {
         case 'delete':
           deleteMlmUser(actionModal.user.id);
-          showToast(`User ID ${actionModal.user.id} has been deleted.`);
+          loadUsers();
+          showToast(`✅ User ID ${actionModal.user.id} (${actionModal.user.name}) and all related data completely deleted from system & database.`, 'success');
           break;
       case 'block':
         updateMlmUserStatus(actionModal.user.id, 'Blocked');

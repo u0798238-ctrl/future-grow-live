@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Network, Menu, X, ChevronRight, LogOut, User as UserIcon } from 'lucide-react';
 import { PwaInstallPrompt, InstallAppButton } from '@/components/PwaInstallPrompt';
+import { RefreshButton } from '@/components/RefreshButton';
 
 export function PublicLayout() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -53,6 +54,7 @@ export function PublicLayout() {
               </nav>
 
               <div className="hidden md:flex items-center space-x-4">
+                <RefreshButton />
                 <InstallAppButton />
                 <Link to="/login" className="text-sm font-medium text-white hover:text-white">
                   Login
@@ -67,6 +69,7 @@ export function PublicLayout() {
 
               {/* Mobile menu button */}
               <div className="md:hidden flex items-center gap-2">
+                <RefreshButton variant="icon-only" />
                 <InstallAppButton className="text-[11px] px-2 py-1" />
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}

@@ -22,7 +22,8 @@ const SYNC_KEYS = [
   'appointments',
   'mlm_active_sessions',
   'mlm_active_admin_session',
-  'mlm_announcements'
+  'mlm_announcements',
+  'system_broadcast'
 ];
 
 let syncInitialized = false;
@@ -33,29 +34,18 @@ const lastKnownUsers = new Map<string, string>();
 export const startFirebaseSync = () => {
   if (syncInitialized) return;
   syncInitialized = true;
-  console.log('Starting Firebase sync...');
+  console.log('Starting Firebase Firestore Realtime Sync...');
+
+  // Clean up legacy single-document mlm_users so old deleted test users never reappear
+  try {
+    deleteDoc(doc(db, 'mlm_app_data', 'mlm_users')).catch(() => {});
+  } catch (e) {
+    // Ignore
+  }
 
   SYNC_KEYS.forEach(key => {
     if (key === 'mlm_users') {
       const colRef = collection(db, 'mlm_users_collection');
-      
-      // Auto-migrate from old document if needed
-      getDoc(doc(db, 'mlm_app_data', 'mlm_users')).then(async (docSnap) => {
-         if (docSnap.exists()) {
-             const data = docSnap.data().data;
-             if (Array.isArray(data) && data.length > 0) {
-                 const currentDocs = await getDocs(colRef);
-                 if (currentDocs.empty) {
-                     console.log('Migrating mlm_users to collection...');
-                     for (const user of data) {
-                         if (user && user.id) {
-                            await setDoc(doc(colRef, user.id), user, { merge: true });
-                         }
-                     }
-                 }
-             }
-         }
-      }).catch(e => console.warn('Migration check failed:', e));
 
       onSnapshot(colRef, (snapshot) => {
         if (snapshot.metadata.hasPendingWrites) return; // Prevent local echo loop
@@ -97,6 +87,8 @@ export const startFirebaseSync = () => {
         if (hasChanges) {
           localStorage.setItem('mlm_users', JSON.stringify(localUsers));
           window.dispatchEvent(new Event('mlm_update'));
+          window.dispatchEvent(new Event('current_user_change'));
+          window.dispatchEvent(new StorageEvent('storage', { key: 'mlm_users' }));
         }
       }, (error) => {
         console.warn(`Firebase sync error for ${key}:`, error);
@@ -114,14 +106,37 @@ export const startFirebaseSync = () => {
         } else {
           localStorage.setItem(key, JSON.stringify(data.data));
         }
-        if (key === 'mlm_announcements') {
+        
+        if (key === 'system_broadcast') {
+          // Automatic live reload or update for all active user tabs
+          const broadcast = data.data;
+          if (broadcast && broadcast.timestamp) {
+            const lastBroadcast = localStorage.getItem('last_processed_broadcast');
+            if (lastBroadcast !== String(broadcast.timestamp)) {
+              localStorage.setItem('last_processed_broadcast', String(broadcast.timestamp));
+              window.dispatchEvent(new Event('mlm_update'));
+              window.dispatchEvent(new Event('mlm_packages_update'));
+              window.dispatchEvent(new Event('mlm_settings_update'));
+              window.dispatchEvent(new Event('current_user_change'));
+              window.dispatchEvent(new Event('announcements_update'));
+              window.dispatchEvent(new Event('storage'));
+            }
+          }
+        } else if (key === 'mlm_announcements') {
           window.dispatchEvent(new CustomEvent('announcements_update', { detail: data.data }));
         } else if (key === 'appointments') {
           window.dispatchEvent(new CustomEvent('appointments_update', { detail: data.data }));
+        } else if (key === 'mlm_packages') {
+          window.dispatchEvent(new Event('mlm_packages_update'));
+          window.dispatchEvent(new Event('mlm_update'));
+        } else if (key === 'mlm_system_settings') {
+          window.dispatchEvent(new Event('mlm_settings_update'));
+          window.dispatchEvent(new Event('mlm_update'));
         } else if (key === 'mlm_active_sessions' || key === 'mlm_active_admin_session') {
           window.dispatchEvent(new Event('mlm_session_update'));
         } else {
           window.dispatchEvent(new Event('mlm_update'));
+          window.dispatchEvent(new Event('current_user_change'));
         }
       }
     }, (error) => {
@@ -190,7 +205,7 @@ export const pushMlmStateToFirebase = async (key: string, value: any): Promise<b
 
 export const deleteUserFromCloud = async (userId: string) => {
    try {
-      const colRef = collection(db, 'mlm_users');
+      const colRef = collection(db, 'mlm_users_collection');
       await deleteDoc(doc(colRef, userId));
       lastKnownUsers.delete(userId);
       console.log('Successfully deleted user from cloud:', userId);
@@ -198,3 +213,23 @@ export const deleteUserFromCloud = async (userId: string) => {
       console.error('Failed to delete user from cloud:', e);
    }
 };
+
+export const broadcastSystemUpdate = async (message: string = 'System updated'): Promise<boolean> => {
+  try {
+    const docRef = doc(db, 'mlm_app_data', 'system_broadcast');
+    await setDoc(docRef, {
+      key_name: 'system_broadcast',
+      data: {
+        timestamp: Date.now(),
+        message,
+      },
+      updated_at: serverTimestamp(),
+    }, { merge: true });
+    console.log('System broadcast sent successfully across all clients:', message);
+    return true;
+  } catch (e) {
+    console.warn('System broadcast warning:', e);
+    return false;
+  }
+};
+

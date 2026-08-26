@@ -1130,17 +1130,27 @@ export const addMlmUser = async (data: AddMlmUserPayload): Promise<MlmUser> => {
      }
    }
 
-   if (data.email) {
-     const isDuplicateEmail = users.some(u => u.email && u.email.trim().toLowerCase() === data.email!.trim().toLowerCase());
+   if (data.email && data.email.trim()) {
+     const cleanEmail = data.email.trim().toLowerCase();
+     const isDuplicateEmail = users.some(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
      if (isDuplicateEmail) {
-       throw new Error('This email address is already registered. Please provide a unique email.');
+       throw new Error(`Email "${data.email}" is already registered. Please provide a unique email address.`);
      }
    }
 
-   if (data.username) {
-     const isDuplicateUsername = users.some(u => u.username && u.username.trim().toLowerCase() === data.username!.trim().toLowerCase());
+   if (data.username && data.username.trim()) {
+     const cleanUsername = data.username.trim().toLowerCase().replace(/^@/, '');
+     const isDuplicateUsername = users.some(u => u.username && u.username.trim().toLowerCase().replace(/^@/, '') === cleanUsername);
      if (isDuplicateUsername) {
-       throw new Error('This username is already taken. Please choose a different username.');
+       throw new Error(`Username "${data.username}" is already taken. Please choose a different username.`);
+     }
+   }
+
+   if (data.mobile && data.mobile.trim()) {
+     const cleanMobile = data.mobile.trim();
+     const isDuplicateMobile = users.some(u => u.mobile && u.mobile.trim() === cleanMobile);
+     if (isDuplicateMobile) {
+       throw new Error(`Mobile number "${data.mobile}" is already registered with another account.`);
      }
    }
 
@@ -1401,38 +1411,61 @@ export const saveMlmUsers = (users: MlmUser[]) => {
 }
 
 export const deleteMlmUser = (userId: string) => {
-   import('@/lib/firebase').then(m => m.deleteUserFromCloud(userId)).catch(console.error);
    let users = getMlmUsers();
    const user = users.find(u => u.id === userId);
    if (!user) return;
    
    // Protect Root Admin from accidental deletion
    if (userId === 'FGPL000001') {
-      console.warn('Cannot delete Root Admin (FGPL000001).');
-      return;
+      throw new Error('Cannot delete Root Admin (FGPL000001).');
    }
    
-   // Clean up all references to this deleted user across other members
+   // 1. Delete from Firebase Cloud Firestore
+   import('@/lib/firebase').then(m => {
+     m.deleteUserFromCloud(userId);
+     m.broadcastSystemUpdate(`User ${userId} deleted by admin`);
+   }).catch(console.error);
+
+   // 2. Delete from Supabase Database
+   import('@/lib/supabase').then(m => {
+     m.deleteUserFromSupabase(userId);
+   }).catch(console.error);
+
+   // 3. Clear active session
+   import('@/lib/sessionManager').then(m => {
+     m.clearActiveUserSession(userId);
+   }).catch(console.error);
+   
+   // 4. Clean up tree structure and safely re-link downlines
+   const userLeftChildId = user.leftId || null;
+   const userRightChildId = user.rightId || null;
+   const parentUser = user.parentId ? users.find(u => u.id === user.parentId) : null;
+   const fallbackSponsor = user.sponsorId || 'FGPL000001';
+
    users.forEach(u => {
-      // Remove tree child pointers
-      if (u.leftId === userId) u.leftId = null;
-      if (u.rightId === userId) u.rightId = null;
-      
-      // If any downline member was sponsored by this deleted user, safely re-link sponsor to upper sponsor or root admin
-      if (u.sponsorId === userId) {
-         u.sponsorId = user.sponsorId || 'FGPL000001';
+      // If u was parent of deleted user, re-link parent's branch to child
+      if (u.leftId === userId) {
+         u.leftId = userLeftChildId || userRightChildId || null;
+      }
+      if (u.rightId === userId) {
+         u.rightId = (u.leftId === userLeftChildId ? userRightChildId : userLeftChildId) || null;
       }
       
-      // If any member had this user as parent in tree, re-link to upper parent or detach
+      // If any downline member was sponsored by this deleted user, safely re-link sponsor
+      if (u.sponsorId === userId) {
+         u.sponsorId = fallbackSponsor;
+      }
+      
+      // If any member had this user as parent in tree, re-link to upper parent or fallback
       if (u.parentId === userId) {
-         u.parentId = user.parentId || null;
+         u.parentId = parentUser ? parentUser.id : 'FGPL000001';
       }
    });
    
-   // ONLY delete the selected single user - do NOT delete any other user!
+   // 5. Remove the user from users array
    users = users.filter(u => u.id !== userId);
    
-   // Clean up from pending members if present
+   // 6. Clean up from pending members
    try {
       const rawPending = localStorage.getItem('pending_members');
       if (rawPending) {
@@ -1446,14 +1479,66 @@ export const deleteMlmUser = (userId: string) => {
       console.error('Error cleaning pending members on delete:', e);
    }
 
-   // Reset current user if deleted
+   // 7. Clean up deposits for this user
+   try {
+      ['app_deposits', 'mlm_deposits', 'admin_deposits'].forEach(key => {
+         const raw = localStorage.getItem(key);
+         if (raw) {
+            const list = JSON.parse(raw);
+            if (Array.isArray(list)) {
+               const filtered = list.filter((tx: any) => tx.userId !== userId && tx.id !== userId);
+               localStorage.setItem(key, JSON.stringify(filtered));
+            }
+         }
+      });
+   } catch (e) {
+      console.error('Error cleaning deposits on delete:', e);
+   }
+
+   // 8. Clean up withdrawals for this user
+   try {
+      ['app_withdrawals', 'mlm_withdrawals'].forEach(key => {
+         const raw = localStorage.getItem(key);
+         if (raw) {
+            const list = JSON.parse(raw);
+            if (Array.isArray(list)) {
+               const filtered = list.filter((tx: any) => tx.userId !== userId && tx.id !== userId);
+               localStorage.setItem(key, JSON.stringify(filtered));
+            }
+         }
+      });
+   } catch (e) {
+      console.error('Error cleaning withdrawals on delete:', e);
+   }
+
+   // 9. Clean up level history & KYC data for this user
+   try {
+      const rawLvl = localStorage.getItem('app_level_history');
+      if (rawLvl) {
+         const list = JSON.parse(rawLvl);
+         if (Array.isArray(list)) {
+            const filtered = list.filter((tx: any) => tx.userId !== userId && tx.fromUserId !== userId && tx.toUserId !== userId);
+            localStorage.setItem('app_level_history', JSON.stringify(filtered));
+         }
+      }
+      localStorage.removeItem(`kyc_data_${userId}`);
+      localStorage.removeItem(`mlm_kyc_${userId}`);
+   } catch (e) {
+      console.error('Error cleaning level history/KYC on delete:', e);
+   }
+
+   // 10. Reset current session if deleted
    if (localStorage.getItem('current_user_id') === userId) {
       localStorage.setItem('current_user_id', 'FGPL000001');
    }
    
+   // 11. Recalculate tree and save
    users = recalculateTreeStats(users);
    localStorage.setItem('mlm_users', JSON.stringify(users)); 
    pushMlmStateToSupabase('mlm_users', users);
+   pushMlmStateToFirebase('mlm_users', users);
+   
+   // 12. Dispatch live events
    window.dispatchEvent(new Event('mlm_update'));
    window.dispatchEvent(new Event('current_user_change'));
    window.dispatchEvent(new StorageEvent('storage', { key: 'mlm_users' }));
