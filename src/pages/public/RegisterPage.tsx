@@ -569,15 +569,18 @@ export function RegisterPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none text-gray-200" htmlFor="username">
-                  Username
+                  Username <span className="text-red-400">*</span>
                 </label>
                 <Input 
                   id="username" 
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
                   placeholder="e.g. umesh123" 
                   required
                 />
+                <p className="text-[11px] text-amber-300 font-medium flex items-center gap-1">
+                  <span>★</span> Compulsory & Important: Used for direct login and unique account identification.
+                </p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none text-gray-200" htmlFor="mobile">
