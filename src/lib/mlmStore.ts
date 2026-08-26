@@ -195,21 +195,6 @@ export const INITIAL_AWARDED_GIFTS: AwardedGift[] = [
 
 export const DEFAULT_PACKAGES: MlmPackage[] = [
   { 
-    id: 1, 
-    name: 'Premium', 
-    price: 8599, 
-    directIncome: 1500, 
-    binaryIncome: 1000, 
-    capping: 10000, 
-    status: 'Active',
-    productChoices: [
-      'Suit Length & Pant (Green Colour)',
-      'Suit Length & Pant (Navy Blue Colour)',
-      'Double Banarasi Saree (Special Edition)',
-      'Suit Length & Banarasi Saree Combo'
-    ]
-  },
-  { 
     id: 2, 
     name: 'Basic', 
     price: 6699, 
@@ -220,7 +205,6 @@ export const DEFAULT_PACKAGES: MlmPackage[] = [
     productChoices: [
       'Suit Length (navy blue Colour - Single Set)',
       'Pant (navy blue Colour - Single Set)',
-      'Banarasi Saree (Single Piece)',
       'Healthcare & Wellness Package'
     ]
   },
@@ -228,7 +212,7 @@ export const DEFAULT_PACKAGES: MlmPackage[] = [
 
 export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   registrationOpen: true,
-  defaultFee: 8599,
+  defaultFee: 6699,
   directIncome: 1500,
   binaryMatching: 1000,
   dailyCappingPairs: 10,
@@ -245,9 +229,10 @@ export const getMlmPackages = (): MlmPackage[] => {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
+        let updated = parsed.filter(p => p.price !== 8599 && !p.name.includes('Premium'));
         const v7Done = localStorage.getItem('mlm_pkg_v7_pant_blue_update');
         if (!v7Done) {
-          const updated = parsed.map((p: MlmPackage) => {
+          updated = updated.map((p: MlmPackage) => {
             if (p.price === 6699 || p.name.toLowerCase() === 'basic') {
               return { 
                 ...p, 
@@ -257,46 +242,40 @@ export const getMlmPackages = (): MlmPackage[] => {
                 productChoices: [
                   'Suit Length (navy blue Colour - Single Set)',
                   'Pant (navy blue Colour - Single Set)',
-                  'Banarasi Saree (Single Piece)',
                   'Healthcare & Wellness Package'
-                ]
-              };
-            }
-            if (p.price === 8599 || p.name.toLowerCase() === 'premium') {
-              return { 
-                ...p, 
-                directIncome: 1500, 
-                binaryIncome: 1000, 
-                capping: 10000,
-                productChoices: [
-                  'Suit Length & Pant (Green Colour)',
-                  'Suit Length & Pant (Navy Blue Colour)',
-                  'Double Banarasi Saree (Special Edition)',
-                  'Suit Length & Banarasi Saree Combo'
                 ]
               };
             }
             return p;
           });
-          localStorage.setItem('mlm_packages', JSON.stringify(updated)); pushMlmStateToSupabase('mlm_packages', updated);
+          localStorage.setItem('mlm_packages', JSON.stringify(updated));
           localStorage.setItem('mlm_pkg_v7_pant_blue_update', 'true');
-          return updated;
         }
-        return parsed;
+        
+        // Ensure 8599 is purged
+        const purge8599 = localStorage.getItem('mlm_purge_8599');
+        if (!purge8599) {
+           updated = updated.filter(p => p.price !== 8599 && !p.name.includes('Premium'));
+           localStorage.setItem('mlm_packages', JSON.stringify(updated));
+           localStorage.setItem('mlm_purge_8599', 'true');
+        }
+        
+        return updated;
       }
     }
   } catch (e) {
     console.error(e);
   }
+  localStorage.setItem('mlm_packages', JSON.stringify(DEFAULT_PACKAGES));
   return DEFAULT_PACKAGES;
 };
 
 export const getPackagePriceBreakdown = (price: number) => {
-  if (price === 8599) {
+  if (price === 6699) {
     return {
       baseAmount: 7052.00,
       gstAmount: 1547.00,
-      totalPayable: 8599.00,
+      totalPayable: 6699.00,
       gstLabel: 'GST'
     };
   }
@@ -492,7 +471,7 @@ export const resetAllIncomesAndTeams = (): MlmUser[] => {
       package: 'Premium',
       selectedProduct: 'Suit Length & Pant (Navy Blue Colour)',
       utrNumber: 'HTX984729104',
-      paymentAmount: 8599,
+      paymentAmount: 6699,
       paymentStatus: 'Approved',
       registeredAt: '18 Aug 2026, 10:30 pm',
       status: 'Active',
@@ -559,7 +538,7 @@ export const getMlmUsers = (): MlmUser[] => {
                   pincode: '221002',
                   package: 'Premium',
                   selectedProduct: 'Suit Length & Pant (Navy Blue Colour)',
-                  paymentAmount: 8599,
+                  paymentAmount: 6699,
                   paymentStatus: 'Approved',
                   registeredAt: '18 Aug 2026, 10:30 pm',
                   status: 'Active',
@@ -606,7 +585,7 @@ export const getMlmUsers = (): MlmUser[] => {
       pincode: '221002',
       package: 'Premium',
       selectedProduct: 'Suit Length & Pant (Navy Blue Colour)',
-      paymentAmount: 8599,
+      paymentAmount: 6699,
       paymentStatus: 'Approved',
       registeredAt: '18 Aug 2026, 10:30 pm',
       status: 'Active',
@@ -1242,7 +1221,7 @@ export const addMlmUser = async (data: AddMlmUserPayload): Promise<MlmUser> => {
    const depositTx: Transaction = {
       id: `DEP-${Date.now().toString().slice(-6)}`,
       type: 'Deposit',
-      amount: isFree ? 0 : (data.paymentAmount || 8599),
+      amount: isFree ? 0 : (data.paymentAmount || 6699),
       description: isFree 
          ? 'Free ID Zero Commission Activation (No Payment)' 
          : `Package Activation Deposit (${data.package || 'Premium'} - ${data.selectedProduct || 'Product'})`,
@@ -1270,7 +1249,7 @@ export const addMlmUser = async (data: AddMlmUserPayload): Promise<MlmUser> => {
       selectedProduct: isFree ? 'Free ID (Zero Commission)' : (data.selectedProduct || 'Suit Length & Pant (Green Colour)'),
       utrNumber: isFree ? 'ADMIN-FREE-ID' : (data.utrNumber || ''),
       paymentProof: data.paymentProof || '',
-      paymentAmount: isFree ? 0 : (data.paymentAmount || 8599),
+      paymentAmount: isFree ? 0 : (data.paymentAmount || 6699),
       paymentStatus: isFree || userStatus === 'Active' ? 'Approved' : 'Pending',
       registeredAt: nowIso,
       status: userStatus,
@@ -1344,7 +1323,7 @@ export const addMlmUser = async (data: AddMlmUserPayload): Promise<MlmUser> => {
    // Recalculate tree stats and persist
    users = recalculateTreeStats(users);
 
-   localStorage.setItem('mlm_users', JSON.stringify(users)); await pushMlmStateToSupabase('mlm_users', users);
+   localStorage.setItem('mlm_users', JSON.stringify(users)); pushMlmStateToSupabase('mlm_users', users);
    window.dispatchEvent(new Event('mlm_update'));
    window.dispatchEvent(new Event('current_user_change'));
    return newUser;
@@ -1422,6 +1401,7 @@ export const saveMlmUsers = (users: MlmUser[]) => {
 }
 
 export const deleteMlmUser = (userId: string) => {
+   import('@/lib/firebase').then(m => m.deleteUserFromCloud(userId)).catch(console.error);
    let users = getMlmUsers();
    const user = users.find(u => u.id === userId);
    if (!user) return;
@@ -1607,7 +1587,7 @@ export const activateUserAccount = (
    if (typeof options?.paymentAmount === 'number') {
       user.paymentAmount = options.paymentAmount;
    } else if (!user.paymentAmount || user.paymentAmount === 0) {
-      user.paymentAmount = isBasic ? 6699 : 8599;
+      user.paymentAmount = 6699;
    }
 
    if (options?.utrNumber) {
@@ -2013,5 +1993,61 @@ export const syncAllDataToCloud = async (): Promise<boolean> => {
 
 export const forceSyncUsers = async () => {
    const users = getMlmUsers();
-   await pushMlmStateToSupabase('mlm_users', users);
+   pushMlmStateToSupabase('mlm_users', users);
+};
+
+export interface Announcement {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl: string;
+  isActive: boolean;
+  createdAt: number;
+}
+
+export const getAnnouncements = (): Announcement[] => {
+  try {
+    const raw = localStorage.getItem('mlm_announcements');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.error(e);
+  }
+  return [];
+};
+
+export const saveAnnouncements = (announcements: Announcement[]) => {
+  localStorage.setItem('mlm_announcements', JSON.stringify(announcements));
+  pushMlmStateToSupabase('mlm_announcements', announcements);
+  window.dispatchEvent(new Event('announcements_update'));
+};
+
+export const addAnnouncement = (title: string, imageUrl: string, description?: string) => {
+  const announcements = getAnnouncements();
+  if (announcements.length >= 10) {
+    throw new Error('Maximum 10 banners allowed. Please delete old ones first.');
+  }
+  announcements.unshift({
+    id: 'ANN-' + Date.now(),
+    title,
+    description,
+    imageUrl,
+    isActive: true,
+    createdAt: Date.now()
+  });
+  saveAnnouncements(announcements);
+};
+
+export const toggleAnnouncement = (id: string, isActive: boolean) => {
+  const announcements = getAnnouncements();
+  const index = announcements.findIndex(a => a.id === id);
+  if (index !== -1) {
+    announcements[index].isActive = isActive;
+    saveAnnouncements(announcements);
+  }
+};
+
+export const deleteAnnouncement = (id: string) => {
+  let announcements = getAnnouncements();
+  announcements = announcements.filter(a => a.id !== id);
+  saveAnnouncements(announcements);
 };

@@ -81,8 +81,6 @@ export function PackagesPage() {
       productChoices: editingPackage?.productChoices || [
         'Suit Length & Pant (Navy Blue Colour)',
         'Suit Length & Pant (Green Colour)',
-        'Double Banarasi Saree (Special Edition)',
-        'Suit Length & Banarasi Saree Combo'
       ]
     };
 

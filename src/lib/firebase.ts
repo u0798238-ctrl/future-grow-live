@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp, collection, getDocs, deleteDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
   projectId: "symbolic-operation-f3n78",
@@ -21,7 +21,8 @@ const SYNC_KEYS = [
   'mlm_awarded_gifts',
   'appointments',
   'mlm_active_sessions',
-  'mlm_active_admin_session'
+  'mlm_active_admin_session',
+  'mlm_announcements'
 ];
 
 let syncInitialized = false;
@@ -113,7 +114,9 @@ export const startFirebaseSync = () => {
         } else {
           localStorage.setItem(key, JSON.stringify(data.data));
         }
-        if (key === 'appointments') {
+        if (key === 'mlm_announcements') {
+          window.dispatchEvent(new CustomEvent('announcements_update', { detail: data.data }));
+        } else if (key === 'appointments') {
           window.dispatchEvent(new CustomEvent('appointments_update', { detail: data.data }));
         } else if (key === 'mlm_active_sessions' || key === 'mlm_active_admin_session') {
           window.dispatchEvent(new Event('mlm_session_update'));
@@ -183,4 +186,15 @@ export const pushMlmStateToFirebase = async (key: string, value: any): Promise<b
     console.error(`Firebase background sync [${key}] failed:`, err);
     return false;
   }
+};
+
+export const deleteUserFromCloud = async (userId: string) => {
+   try {
+      const colRef = collection(db, 'mlm_users');
+      await deleteDoc(doc(colRef, userId));
+      lastKnownUsers.delete(userId);
+      console.log('Successfully deleted user from cloud:', userId);
+   } catch (e) {
+      console.error('Failed to delete user from cloud:', e);
+   }
 };

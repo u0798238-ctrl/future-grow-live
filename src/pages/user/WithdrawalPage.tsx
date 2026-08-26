@@ -295,7 +295,7 @@ export function WithdrawalPage() {
        
        // CRITICAL: Push to Cloud immediately so all admin devices sync the deduction!
        const { pushMlmStateToSupabase } = await import('@/lib/mlmStore');
-           await pushMlmStateToSupabase('mlm_users', users);
+           pushMlmStateToSupabase('mlm_users', users);
        
        window.dispatchEvent(new Event('mlm_update'));
        setAmount('');

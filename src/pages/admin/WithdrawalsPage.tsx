@@ -38,7 +38,7 @@ export function WithdrawalsPage() {
          localStorage.setItem('mlm_users', JSON.stringify(allUsers));
          
          const { pushMlmStateToSupabase } = await import('@/lib/mlmStore');
-            await pushMlmStateToSupabase('mlm_users', allUsers);
+            pushMlmStateToSupabase('mlm_users', allUsers);
 
 
          

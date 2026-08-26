@@ -46,7 +46,7 @@ export function RegisterPage() {
   const currentSelectedPkg = availablePackages.find(p => p.id === selectedPackageId) || availablePackages[0] || {
     id: 1,
     name: 'Premium',
-    price: 8599,
+    price: 6699,
     directIncome: 1500,
     binaryIncome: 1000,
     capping: 10000,
@@ -54,8 +54,6 @@ export function RegisterPage() {
     productChoices: [
       'Suit Length & Pant (Green Colour)',
       'Suit Length & Pant (Navy Blue Colour)',
-      'Double Banarasi Saree (Special Edition)',
-      'Suit Length & Banarasi Saree Combo'
     ]
   };
 
@@ -65,13 +63,10 @@ export function RegisterPage() {
     const defaultChoices = isBasic ? [
       { name: 'Suit Length (navy blue Colour - Single Set)', comingSoon: false },
       { name: 'Pant (Green Colour - Single Set)', comingSoon: false },
-      { name: 'Banarasi Saree (Single Piece)', comingSoon: false },
       { name: 'Healthcare & Wellness Package', comingSoon: true }
     ] : [
       { name: 'Suit Length & Pant (Green Colour)', comingSoon: false },
       { name: 'Suit Length & Pant (Navy Blue Colour)', comingSoon: false },
-      { name: 'Double Banarasi Saree (Special Edition)', comingSoon: false },
-      { name: 'Suit Length & Banarasi Saree Combo', comingSoon: false }
     ];
 
     const productList = pkg.productChoices && pkg.productChoices.length > 0 
@@ -257,6 +252,11 @@ export function RegisterPage() {
 
     const allUsers = getMlmUsers();
 
+    if (!username.trim()) {
+      setErrorMsg('Username is required.');
+      return;
+    }
+
     if (username.trim()) {
       const isDuplicateUsername = allUsers.some(u => u.username && u.username.trim().toLowerCase() === username.trim().toLowerCase());
       if (isDuplicateUsername) {
@@ -398,7 +398,7 @@ export function RegisterPage() {
                 <div>
                   <span className="text-gray-300 block">Package:</span>
                   <span className="text-white font-medium">
-                    {registeredUser.package} (₹{new Intl.NumberFormat('en-IN').format(registeredUser.paymentAmount || (registeredUser.package?.includes('Basic') ? 6699 : 8599))})
+                    {registeredUser.package} (₹{new Intl.NumberFormat('en-IN').format(registeredUser.paymentAmount || (registeredUser.package?.includes('Basic') ? 6699 : 6699))})
                   </span>
                 </div>
                 <div>
@@ -567,13 +567,14 @@ export function RegisterPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium leading-none text-gray-200" htmlFor="username">
-                  Username <span className="text-gray-400 text-xs">(Optional - for easy login)</span>
+                  Username
                 </label>
                 <Input 
                   id="username" 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="e.g. umesh123" 
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -808,13 +809,10 @@ export function RegisterPage() {
                       const defaultChoices = isBasicType ? [
                         { name: 'Suit Length (navy blue Colour - Single Set)', comingSoon: false },
                         { name: 'Pant (navy blue Colour - Single Set)', comingSoon: false },
-                        { name: 'Banarasi Saree (Single Piece)', comingSoon: false },
                         { name: 'Healthcare & Wellness Package', comingSoon: true }
                       ] : [
                         { name: 'Suit Length & Pant (Green Colour)', comingSoon: false },
                         { name: 'Suit Length & Pant (Navy Blue Colour)', comingSoon: false },
-                        { name: 'Double Banarasi Saree (Special Edition)', comingSoon: false },
-                        { name: 'Suit Length & Banarasi Saree Combo', comingSoon: false }
                       ];
 
                       const productList = pkg.productChoices && pkg.productChoices.length > 0 
@@ -886,7 +884,6 @@ export function RegisterPage() {
                                 {productList.map(item => {
                                   const isNavyBlue = item.name.toLowerCase().includes('navy blue') || item.name.toLowerCase().includes('blue');
                                   const isGreen = item.name.toLowerCase().includes('green');
-                                  const isSaree = item.name.toLowerCase().includes('saree') || item.name.toLowerCase().includes('sadi');
 
                                   return (
                                     <label 
@@ -915,9 +912,6 @@ export function RegisterPage() {
                                           )}
                                           {isGreen && (
                                             <span className="w-3 h-3 rounded-full bg-[#059669] border-2 border-emerald-300 shadow-sm shrink-0" title="Green Colour" />
-                                          )}
-                                          {isSaree && !isNavyBlue && !isGreen && (
-                                            <span className="w-3 h-3 rounded-full bg-[#B45309] border-2 border-yellow-300 shadow-sm shrink-0" title="Banarasi Silk" />
                                           )}
                                           <span className="text-[11px] font-medium leading-tight">{item.name}</span>
                                         </div>

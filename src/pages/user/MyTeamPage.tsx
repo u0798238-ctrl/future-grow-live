@@ -113,7 +113,7 @@ export function MyTeamPage() {
                 filteredTeam.map((member) => {
                   const pkg = getPackageForUser(member);
                   const isBasic = member.package?.toLowerCase().includes('basic') || member.paymentAmount === 6699;
-                  const idAmount = member.paymentAmount || pkg.price || (isBasic ? 6699 : 8599);
+                  const idAmount = member.paymentAmount || pkg.price || 6699;
                   const selectedProd = member.selectedProduct || (isBasic ? 'Shuit lanth (Single Piece)' : 'Shuit lanth & paint');
                   
                   return (

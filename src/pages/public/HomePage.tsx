@@ -1,574 +1,481 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  Star, MapPin, ArrowRight, Sparkles, Target, Users, Globe, 
+  Rocket, Sprout, Gem, Flame, Clock, MessageCircle, Youtube,
+  Building2, TrendingUp, Award
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, MapPin, Target, Users, Sparkles, Globe2, Rocket, Sprout, Gem, Flame, Clock, Download, Smartphone, MessageCircle, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
+const calculateUptime = () => {
+  // Configured company start date (producing ~2 yrs, 9 mos, 11 days, and ticking live)
+  const startDate = new Date("2023-11-14T00:00:00");
+  const now = new Date();
+  
+  let years = now.getFullYear() - startDate.getFullYear();
+  let months = now.getMonth() - startDate.getMonth();
+  let days = now.getDate() - startDate.getDate();
+
+  if (days < 0) {
+    months -= 1;
+    const prevMonthLastDay = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+    days += prevMonthLastDay;
+  }
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  const seconds = now.getSeconds().toString().padStart(2, '0');
+
+  return { years, months, days, timeString: `${hours} : ${minutes} : ${seconds}` };
+};
+
+const calculateCommunityCount = () => {
+  // Base count of 1,33,815 with automatic 10 new members incremented daily
+  const baseDate = new Date("2026-08-25T00:00:00");
+  const baseCount = 133815;
+  const now = new Date();
+  const diffMs = Math.max(0, now.getTime() - baseDate.getTime());
+  
+  // 10 members added across each 24-hour day (86,400,000 ms)
+  const additionalMembers = Math.floor((diffMs / 86400000) * 10);
+  const total = baseCount + additionalMembers;
+  return total.toLocaleString('en-IN');
+};
+
 export function HomePage() {
-  const [liveStats, setLiveStats] = useState({
-    community: 133780,
-    years: 2,
-    months: 9,
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
+  const [uptime, setUptime] = useState(calculateUptime());
+  const [communityCount, setCommunityCount] = useState(calculateCommunityCount());
 
   useEffect(() => {
-    // Exact Launch Date calculation (to hit exactly ~2 years 9 months in Aug 2026)
-    // We'll use Nov 18, 2023.
-    const startMs = new Date('2023-11-18T00:00:00Z').getTime();
-    const counterBaseDate = new Date('2026-08-18T00:00:00Z').getTime();
-    const baseCommunity = 133780;
-    const usersPerMs = 4.5 / (24 * 60 * 60 * 1000); // 4.5 users per day
-
-    const updateStats = () => {
-      const nowMs = Date.now();
-      
-      // Community Logic (Smooth continuous growth from base date)
-      const msElapsedSinceBase = nowMs - counterBaseDate;
-      const currentCommunity = baseCommunity + Math.floor(Math.max(0, msElapsedSinceBase) * usersPerMs);
-
-      // Timer Logic
-      const diffMs = Math.max(0, nowMs - startMs);
-      const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      
-      const years = Math.floor(totalDays / 365.25);
-      const months = Math.floor((totalDays % 365.25) / 30.44);
-      const days = Math.floor((totalDays % 365.25) % 30.44);
-      
-      const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diffMs / 1000 / 60) % 60);
-      const seconds = Math.floor((diffMs / 1000) % 60);
-
-      setLiveStats({
-        community: currentCommunity,
-        years,
-        months,
-        days,
-        hours,
-        minutes,
-        seconds
-      });
-    };
-
-    updateStats();
-    const interval = setInterval(updateStats, 1000);
-    return () => clearInterval(interval);
+    const timer = setInterval(() => {
+      setUptime(calculateUptime());
+      setCommunityCount(calculateCommunityCount());
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="flex flex-col bg-[#071E2C] min-h-screen text-white">
-      
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#071E2C] via-[#0E2535] to-[#132C3C] border-b border-[#28485A]">
-        <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-[#6F9DB5] rounded-full blur-[120px] opacity-20"></div>
-        <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-72 h-72 bg-[#6F9DB5] rounded-full blur-[100px] opacity-10"></div>
+    <div className="min-h-screen bg-[#051520] flex flex-col font-sans overflow-x-hidden text-gray-200">
+      <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 space-y-6">
         
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 text-center">
-          <div className="flex flex-col items-center gap-3 mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1B3343] border border-[#35576A] text-gray-300 text-xs font-medium uppercase tracking-widest shadow-sm">
-              <Star className="w-3.5 h-3.5 text-[#D99A4A]" />
-              A New Opportunity for a Better Tomorrow
-            </div>
-            
-            <div className="relative group cursor-default mx-auto w-full max-w-xl mb-4 mt-2">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#6F9DB5]/30 to-[#35B779]/30 rounded-2xl blur-xl opacity-40 group-hover:opacity-80 transition-opacity duration-700"></div>
-              <div className="relative rounded-2xl overflow-hidden border border-[#28485A]/50 shadow-2xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop" 
-                  alt="Future Grow Corporate Head Office" 
-                  className="w-full h-36 md:h-48 object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5 text-left flex items-end justify-between">
-                  <div>
-                    <h3 className="text-lg md:text-xl font-bold text-white mb-0.5 shadow-sm drop-shadow-lg">Corporate Head Office</h3>
-                    <p className="text-xs md:text-sm text-gray-200 font-medium flex items-center gap-1.5 drop-shadow-md">
-                      <MapPin className="w-3.5 h-3.5 text-[#35B779]" /> Gomti Nagar, Lucknow, UP – 226010, India
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* HERO SECTION */}
+        <div className="flex justify-center mb-6">
+           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#112738] border border-[#1C3A50] text-gray-300 text-[10px] font-medium tracking-wider uppercase">
+             <Star className="w-3 h-3 text-[#D99A4A]" />
+             A New Opportunity For A Better Tomorrow
+           </div>
+        </div>
+
+        {/* Corporate Head Office Image */}
+        <div className="relative rounded-2xl overflow-hidden border border-[#1C3A50] shadow-lg mb-8">
+          <img 
+            src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop" 
+            alt="Corporate Head Office" 
+            className="w-full h-40 md:h-56 object-cover object-center"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#051520] via-[#051520]/40 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Corporate Head Office</h3>
+            <p className="text-xs md:text-sm text-gray-300 flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#35B779]" /> Gomti Nagar, Lucknow, UP – 226010, India
+            </p>
           </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-8 drop-shadow-sm">
+        </div>
+
+        {/* Title */}
+        <div className="text-center mb-10">
+          <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight mb-6">
             FUTURE GROW
           </h1>
-          
-          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto font-light leading-relaxed mb-10">
+          <p className="text-base md:text-lg text-gray-300 max-w-2xl mx-auto font-light leading-relaxed">
             A platform where people can focus on personal and business growth through products, training, networking, and leadership development.
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="mt-8 flex justify-center">
             <Link to="/register">
-              <Button size="lg" className="w-full sm:w-auto text-base bg-[#6F9DB5] hover:bg-[#86B4C9] text-white font-semibold h-14 px-8 rounded-xl shadow-[0_0_20px_rgba(111,157,181,0.3)] transition-all">
-                Start Your Journey <ArrowRight className="ml-2 h-5 w-5" />
+              <Button className="bg-[#6F9DB5] hover:bg-[#5C8A9F] text-white font-medium px-6 py-2.5 rounded-lg h-auto text-base shadow-[0_0_15px_rgba(111,157,181,0.2)]">
+                Start Your Journey <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
         </div>
-      </section>
+        
+        <div className="my-16 h-px w-full bg-gradient-to-r from-transparent via-[#1C3A50] to-transparent"></div>
 
-      {/* Main Content Article */}
-      <section className="py-20 relative">
-        <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 space-y-16">
+        {/* OUR PURPOSE */}
+        <div className="bg-[#0B1E2D] rounded-2xl p-6 md:p-8 border border-[#1C3A50] relative overflow-hidden">
+          <div className="absolute -right-10 -bottom-10 opacity-5">
+            <Target className="w-64 h-64" />
+          </div>
+          <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-4 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-gray-400" /> OUR PURPOSE
+          </h2>
+          <p className="text-lg md:text-xl text-gray-200 leading-relaxed mb-6 relative z-10">
+            Future Grow aims to create a new opportunity for people who have not yet been able to achieve the financial growth they dreamed of through traditional businesses or other companies.
+          </p>
+          <div className="p-5 bg-[#081824] rounded-lg border-l-4 border-[#6F9DB5] relative z-10">
+            <p className="text-base md:text-lg text-gray-300 italic">
+              <span className="font-semibold text-white">We believe that</span> <span className="text-[#6F9DB5]">the right opportunity + proper guidance + consistent effort</span> <span className="font-semibold text-white">can help individuals move forward and build a stronger future.</span>
+            </p>
+          </div>
+        </div>
+
+        {/* OUR VISION (First) */}
+        <div className="bg-[#0B1E2D] rounded-2xl p-6 md:p-8 border border-[#1C3A50]">
+          <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-4 flex items-center gap-2">
+            <Target className="w-4 h-4 text-gray-400" /> OUR VISION
+          </h2>
+          <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-4">
+            “To provide people with an opportunity to learn, grow and work toward building a better financial future.”
+          </h3>
+          <p className="text-gray-300 text-base md:text-lg">
+            Everyone dreams of a better financial future. We provide the tools, the network, and the support to make it a reality.
+          </p>
+        </div>
+
+        {/* TEAMWORK = GROWTH */}
+        <div className="bg-[#0B1E2D] rounded-2xl p-6 md:p-8 border border-[#1C3A50]">
+          <h2 className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-6 flex items-center gap-2">
+            <Users className="w-4 h-4 text-gray-400" /> TEAMWORK = GROWTH
+          </h2>
+          <p className="text-white font-medium mb-4 text-base md:text-lg">You can develop skills in:</p>
+          <ul className="space-y-4">
+            {[
+              "Business & Product Knowledge",
+              "Digital & Online Marketing",
+              "Team Building & Network Expansion",
+              "Leadership & Communication",
+              "Personal Development"
+            ].map((skill, i) => (
+              <li key={i} className="flex items-center gap-3 text-gray-300 text-base">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5]"></div>
+                {skill}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="my-16 h-px w-full bg-gradient-to-r from-transparent via-[#1C3A50] to-transparent"></div>
+
+        {/* LIFE AT FUTURE GROW */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#112738] border border-[#1C3A50] text-[#6F9DB5] text-xs font-bold tracking-widest uppercase mb-3">
+            <Sparkles className="w-3.5 h-3.5" /> EXCLUSIVE CULTURE
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-wider uppercase">
+            LIFE AT FUTURE GROW
+          </h2>
+        </div>
+
+        <div className="space-y-6">
+          {/* Card 1: Corporate Meetings */}
+          <div className="relative rounded-2xl overflow-hidden border border-[#1C3A50] hover:border-[#6F9DB5]/60 transition-all duration-300 aspect-[16/9] md:aspect-[21/9] shadow-xl group">
+            <img 
+              src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2070&auto=format&fit=crop" 
+              alt="Corporate Meetings" 
+              className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051520] via-[#051520]/50 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-6 md:p-8">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#112738]/90 backdrop-blur border border-[#6F9DB5]/40 text-[10px] font-bold text-[#6F9DB5] uppercase tracking-wider rounded-md mb-3 shadow-md">
+                <Target className="w-3 h-3" /> LEADERSHIP & VISION
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Corporate Meetings</h3>
+              <p className="text-sm md:text-base text-gray-300 max-w-xl leading-relaxed">Collaborating with the best minds to drive innovation and support our growing network.</p>
+            </div>
+          </div>
+
+          {/* Card 2: Premium Workspaces */}
+          <div className="relative rounded-2xl overflow-hidden border border-[#1C3A50] hover:border-[#35B779]/60 transition-all duration-300 aspect-[16/9] md:aspect-[21/9] shadow-xl group">
+            <img 
+              src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop" 
+              alt="Premium Workspaces" 
+              className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051520] via-[#051520]/50 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-6 md:p-8">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#112738]/90 backdrop-blur border border-[#35B779]/40 text-[10px] font-bold text-[#35B779] uppercase tracking-wider rounded-md mb-3 shadow-md">
+                <Building2 className="w-3 h-3" /> MODERN WORKSPACE
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Premium Workspaces</h3>
+              <p className="text-sm md:text-base text-gray-300 max-w-xl leading-relaxed">Professional and inspiring environment designed for our visionary leaders.</p>
+            </div>
+          </div>
+
+          {/* Card 3: Achieving Success */}
+          <div className="relative rounded-2xl overflow-hidden border border-[#1C3A50] hover:border-[#4CC9F0]/60 transition-all duration-300 aspect-[16/9] md:aspect-[21/9] shadow-xl group">
+            <img 
+              src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2032&auto=format&fit=crop" 
+              alt="Achieving Success" 
+              className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051520] via-[#051520]/50 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-6 md:p-8">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#112738]/90 backdrop-blur border border-[#4CC9F0]/40 text-[10px] font-bold text-[#4CC9F0] uppercase tracking-wider rounded-md mb-3 shadow-md">
+                <TrendingUp className="w-3 h-3" /> GROWTH & MILESTONES
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Achieving Success</h3>
+              <p className="text-sm md:text-base text-gray-300 max-w-xl leading-relaxed">Reaching financial milestones, breaking barriers, and living the dream together.</p>
+            </div>
+          </div>
+
+          {/* Card 4: Mega Seminars */}
+          <div className="relative rounded-2xl overflow-hidden border border-[#1C3A50] hover:border-[#35B779]/60 transition-all duration-300 aspect-[16/9] md:aspect-[21/9] shadow-xl group">
+            <img 
+              src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop" 
+              alt="Mega Seminars" 
+              className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051520] via-[#051520]/50 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-6 md:p-8">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#112738]/90 backdrop-blur border border-[#35B779]/40 text-[10px] font-bold text-[#35B779] uppercase tracking-wider rounded-md mb-3 shadow-md">
+                <Users className="w-3 h-3" /> COMMUNITY & EVENTS
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Mega Seminars</h3>
+              <p className="text-sm md:text-base text-gray-300 max-w-xl leading-relaxed">Learn from top industry leaders in massive national company conventions.</p>
+            </div>
+          </div>
+
+          {/* Card 5: Rewards & Awards */}
+          <div className="relative rounded-2xl overflow-hidden border border-[#1C3A50] hover:border-[#D99A4A]/60 transition-all duration-300 aspect-[16/9] md:aspect-[21/9] shadow-xl group">
+            <img 
+              src="https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=2069&auto=format&fit=crop" 
+              alt="Rewards & Awards" 
+              className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#051520] via-[#051520]/50 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 p-6 md:p-8">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#112738]/90 backdrop-blur border border-[#D99A4A]/40 text-[10px] font-bold text-[#D99A4A] uppercase tracking-wider rounded-md mb-3 shadow-md">
+                <Award className="w-3 h-3" /> RECOGNITION & HONORS
+              </div>
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Rewards & Awards</h3>
+              <p className="text-sm md:text-base text-gray-300 max-w-xl leading-relaxed">Celebrating top achievers and life-changing milestones on the grand stage.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="my-16 h-px w-full bg-gradient-to-r from-transparent via-[#1C3A50] to-transparent"></div>
+
+        {/* FUTURE GROW MODEL */}
+        <div className="text-center mb-10">
+          <h2 className="text-xl md:text-2xl font-bold text-white tracking-widest uppercase mb-10">
+            FUTURE GROW MODEL
+          </h2>
+          <div className="space-y-6 mb-10">
+            <h3 className="text-2xl md:text-3xl font-bold text-[#8FA3AF]">LEARN</h3>
+            <h3 className="text-2xl md:text-3xl font-bold text-[#8FA3AF]">WORK</h3>
+            <h3 className="text-2xl md:text-3xl font-bold text-[#8FA3AF]">BUILD</h3>
+            <h3 className="text-2xl md:text-3xl font-bold text-[#6F9DB5]">GROW</h3>
+          </div>
+          <p className="text-gray-200 text-base md:text-lg max-w-2xl mx-auto">
+            Build your knowledge. Develop your skills. Build your team. Work consistently toward your goals.
+          </p>
+        </div>
+
+        <div className="my-16 h-px w-full bg-gradient-to-r from-transparent via-[#1C3A50] to-transparent"></div>
+
+        {/* OUR VISION (Building stronger future) */}
+        <div className="bg-[#0B1E2D] rounded-2xl p-6 md:p-8 border border-[#1C3A50]">
+          <h2 className="text-xs font-bold tracking-widest text-white uppercase mb-6 flex items-center gap-2">
+            <Globe className="w-5 h-5 text-white" /> OUR VISION
+          </h2>
+          <h3 className="text-lg md:text-xl font-bold text-white uppercase mb-6">BUILDING A STRONGER FUTURE, TOGETHER</h3>
+          <p className="text-gray-300 mb-6 text-base md:text-lg leading-relaxed">
+            Future Grow's vision is to become a trusted and growing platform that creates <span className="text-[#6F9DB5]">long-term opportunities for people, families and communities</span>.
+          </p>
+          <p className="text-gray-300 text-base md:text-lg leading-relaxed">
+            We believe the future belongs to those who <span className="text-white font-semibold">think bigger, learn continuously, work consistently and grow together.</span>
+          </p>
+        </div>
+
+        {/* OUR BIGGER DREAM */}
+        <div className="bg-[#0B1E2D] rounded-2xl p-6 md:p-8 border border-[#1C3A50]">
+          <h2 className="text-xs font-bold tracking-widest text-white uppercase mb-6 flex items-center gap-2">
+            <Rocket className="w-5 h-5 text-white" /> OUR BIGGER DREAM
+          </h2>
+          <p className="text-gray-300 mb-6 text-base md:text-lg leading-relaxed">
+            In the coming years, we aim to <span className="text-[#6F9DB5]">develop and expand Future Grow on a much larger scale</span>, reaching more cities, more communities and more people.
+          </p>
+          <p className="text-gray-300 text-base md:text-lg leading-relaxed">
+            Our goal is to build a strong ecosystem where people can learn new skills, discover business opportunities, develop leadership qualities and work together toward their financial goals.
+          </p>
+        </div>
+
+        {/* OUR FUTURE FOCUS */}
+        <div className="bg-[#0B1E2D] rounded-2xl p-6 md:p-8 border border-[#1C3A50]">
+          <h2 className="text-xs font-bold tracking-widest text-white uppercase mb-6 flex items-center gap-2">
+            <Sprout className="w-5 h-5 text-white" /> OUR FUTURE FOCUS
+          </h2>
+          <div className="flex items-center gap-3 text-xs font-bold tracking-widest text-gray-400 uppercase mb-8 flex-wrap">
+            <span>EXPAND</span> <ArrowRight className="w-3 h-3" />
+            <span>EDUCATE</span> <ArrowRight className="w-3 h-3" />
+            <span>EMPOWER</span> <ArrowRight className="w-3 h-3" />
+            <span>GROW</span>
+          </div>
+          <ul className="space-y-4">
+            {[
+              "Build a strong and professional organization",
+              "Expand our network across India and beyond",
+              "Provide quality products and business education",
+              "Develop thousands of capable leaders",
+              "Create opportunities to grow through their efforts",
+              "Build a long-term sustainable organization"
+            ].map((item, i) => (
+              <li key={i} className="flex items-center gap-3 text-gray-300 text-base">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5]"></div>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* OUR BELIEF */}
+        <div className="bg-[#0B1E2D] rounded-2xl p-6 md:p-10 border-l-4 border-[#35B779] border-t border-r border-b border-t-[#1C3A50] border-r-[#1C3A50] border-b-[#1C3A50] relative overflow-hidden">
+          <div className="absolute right-0 bottom-0 opacity-5 -mr-4 -mb-4">
+             <Gem className="w-48 h-48" />
+          </div>
+          <h2 className="text-xs font-bold tracking-widest text-[#8FA3AF] uppercase mb-6 flex items-center gap-2 relative z-10">
+            <Gem className="w-4 h-4 text-[#8FA3AF]" /> OUR BELIEF
+          </h2>
+          <h3 className="text-2xl md:text-3xl font-bold text-white italic leading-tight mb-8 relative z-10">
+            “When one person grows, it is success. When thousands grow together, it becomes a movement.”
+          </h3>
+          <p className="text-gray-300 text-lg relative z-10">
+            Future Grow wants to create a future where <span className="text-[#6F9DB5]">hard work, teamwork, knowledge and leadership</span> can open new possibilities for people.
+          </p>
+        </div>
+
+        <div className="flex justify-center my-16">
+          <Flame className="w-10 h-10 text-gray-400" />
+        </div>
+
+        {/* FUTURE GROW */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-widest uppercase mb-8">
+            FUTURE GROW
+          </h2>
+          <div className="space-y-6 mb-10">
+            <h3 className="text-base md:text-lg font-bold tracking-widest text-[#8FA3AF]">DREAM BIG</h3>
+            <h3 className="text-base md:text-lg font-bold tracking-widest text-[#8FA3AF]">WORK SMART</h3>
+            <h3 className="text-base md:text-lg font-bold tracking-widest text-[#8FA3AF]">GROW TOGETHER</h3>
+          </div>
+        </div>
+        
+        <div className="bg-[#0B1E2D] rounded-2xl p-6 md:p-8 border border-[#1C3A50] text-center">
+           <p className="text-gray-300 italic font-medium text-lg md:text-xl leading-relaxed">
+             Our vision is not just to build a company.<br/>
+             Our vision is to build a strong community that grows together for years to come.
+           </p>
+        </div>
+
+        <div className="my-16 h-px w-full bg-gradient-to-r from-transparent via-[#1C3A50] to-transparent"></div>
+
+        {/* Our Growing Network */}
+        <div className="text-center mb-10 relative">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none">
+            <Globe className="w-80 h-80" />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Our Growing Network</h2>
+          <div className="w-20 h-1 bg-[#35B779] mx-auto rounded-full mb-10"></div>
           
-          {/* Our Purpose */}
-          <div className="bg-[#132C3C]/50 rounded-3xl p-8 md:p-12 border border-[#8FA3AF]/30 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-              <Target className="w-32 h-32 text-white" />
-            </div>
-            <div className="relative z-10">
-              <h2 className="text-sm font-semibold tracking-widest text-gray-300 uppercase mb-4 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" /> Our Purpose
-              </h2>
-              <p className="text-lg md:text-xl leading-relaxed text-gray-200 mb-6">
-                Future Grow aims to create a new opportunity for people who have not yet been able to achieve the financial growth they dreamed of through traditional businesses or other companies.
-              </p>
-              <div className="p-6 bg-[#071E2C] rounded-xl border-l-4 border-[#8FA3AF]">
-                <p className="text-lg text-white font-medium italic">
-                  We believe that <span className="text-[#6F9DB5]">the right opportunity + proper guidance + consistent effort</span> can help individuals move forward and build a stronger future.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Grid Sections: Vision & Teamwork */}
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-[#132C3C]/50 rounded-3xl p-8 border border-[#8FA3AF]/30">
-              <h2 className="text-sm font-semibold tracking-widest text-gray-300 uppercase mb-4 flex items-center gap-2">
-                <Target className="w-4 h-4" /> Our Vision
-              </h2>
-              <h3 className="text-2xl font-semibold text-white mb-4 leading-tight">
-                “To provide people with an opportunity to learn, grow and work toward building a better financial future.”
-              </h3>
-              <p className="text-gray-300">
-                Everyone dreams of a better financial future. We provide the tools, the network, and the support to make it a reality.
-              </p>
-            </div>
-
-            <div className="bg-[#132C3C]/50 rounded-3xl p-8 border border-[#8FA3AF]/30">
-              <h2 className="text-sm font-semibold tracking-widest text-gray-300 uppercase mb-4 flex items-center gap-2">
-                <Users className="w-4 h-4" /> Teamwork = Growth
-              </h2>
-              <p className="text-white font-medium mb-4">You can develop skills in:</p>
-              <ul className="space-y-2 text-gray-300">
-                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5]"></div> Business & Product Knowledge</li>
-                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5]"></div> Digital & Online Marketing</li>
-                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5]"></div> Team Building & Network Expansion</li>
-                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5]"></div> Leadership & Communication</li>
-                <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5]"></div> Personal Development</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Life at Future Grow - Image Gallery */}
-          <div className="pt-8 pb-0">
-            <h2 className="text-2xl md:text-3xl font-semibold text-white uppercase tracking-wider text-center mb-10">Life at Future Grow</h2>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 h-auto md:h-[500px]">
-              
-              {/* Large Image (Meeting) */}
-              <div className="md:col-span-8 relative rounded-3xl overflow-hidden group shadow-2xl h-[300px] md:h-full border border-[#28485A]/40">
-                <div className="absolute inset-0 bg-[#071E2C]/20 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
-                <img 
-                  src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=2000&auto=format&fit=crop" 
-                  alt="Corporate Team Meeting" 
-                  className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
-                <div className="absolute bottom-0 left-0 p-6 md:p-8 z-30">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1B3343]/80 border border-[#6F9DB5]/30 text-[#6F9DB5] text-[10px] font-bold uppercase tracking-widest mb-3 backdrop-blur-md">
-                    Leadership & Vision
-                  </div>
-                  <h3 className="text-xl md:text-3xl font-bold text-white mb-2 shadow-sm drop-shadow-lg">Corporate Meetings</h3>
-                  <p className="text-sm md:text-base text-gray-300 max-w-md drop-shadow-md">Collaborating with the best minds to drive innovation and support our growing network.</p>
-                </div>
-              </div>
-
-              {/* Smaller Images Stack (Car/Lifestyle & Working) */}
-              <div className="md:col-span-4 flex flex-col gap-4 md:gap-6 h-full">
-                
-                {/* Working Image */}
-                <div className="relative rounded-3xl overflow-hidden group shadow-xl h-[250px] md:h-1/2 border border-[#28485A]/40">
-                  <div className="absolute inset-0 bg-[#071E2C]/30 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
-                  <img 
-                    src="https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1000&auto=format&fit=crop" 
-                    alt="Corporate Office" 
-                    className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
-                  <div className="absolute bottom-0 left-0 p-5 md:p-6 z-30">
-                    <h3 className="text-lg md:text-xl font-bold text-white mb-1 shadow-sm drop-shadow-lg">Premium Workspaces</h3>
-                    <p className="text-xs md:text-sm text-gray-300 drop-shadow-md">Professional environment for our leaders.</p>
-                  </div>
-                </div>
-
-                {/* Car/Success Image */}
-                <div className="relative rounded-3xl overflow-hidden group shadow-xl h-[250px] md:h-1/2 border border-[#28485A]/40">
-                  <div className="absolute inset-0 bg-[#071E2C]/40 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
-                  <img 
-                    src="https://images.unsplash.com/photo-1614200187524-dc4b892acf16?q=80&w=1000&auto=format&fit=crop" 
-                    alt="Luxury Car Success" 
-                    className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
-                  <div className="absolute bottom-0 left-0 p-5 md:p-6 z-30">
-                    <h3 className="text-lg md:text-xl font-bold text-white mb-1 shadow-sm drop-shadow-lg">Achieving Success</h3>
-                    <p className="text-xs md:text-sm text-gray-300 drop-shadow-md">Reaching financial milestones and living the dream.</p>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-          {/* Mega Events & Rewards - Image Gallery 2 */}
-          <div className="pt-4 md:pt-6 pb-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-              
-              {/* Mega Seminars Image */}
-              <div className="relative rounded-3xl overflow-hidden group shadow-xl h-[300px] border border-[#28485A]/40">
-                <div className="absolute inset-0 bg-[#071E2C]/30 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
-                <img 
-                  src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1000&auto=format&fit=crop" 
-                  alt="Mega Seminars" 
-                  className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
-                <div className="absolute bottom-0 left-0 p-5 md:p-6 z-30">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1B3343]/80 border border-[#35B779]/30 text-[#35B779] text-[10px] font-bold uppercase tracking-widest mb-2 backdrop-blur-md">
-                    <Users className="w-3 h-3" /> Community
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-1 shadow-sm drop-shadow-lg">Mega Seminars</h3>
-                  <p className="text-sm text-gray-300 drop-shadow-md">Learn from top leaders in massive company events.</p>
-                </div>
-              </div>
-
-              {/* Rewards & Recognition Image */}
-              <div className="relative rounded-3xl overflow-hidden group shadow-xl h-[300px] border border-[#28485A]/40">
-                <div className="absolute inset-0 bg-[#071E2C]/30 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
-                <img 
-                  src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=1000&auto=format&fit=crop" 
-                  alt="Rewards & Recognition" 
-                  className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
-                <div className="absolute bottom-0 left-0 p-5 md:p-6 z-30">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1B3343]/80 border border-[#D99A4A]/30 text-[#D99A4A] text-[10px] font-bold uppercase tracking-widest mb-2 backdrop-blur-md">
-                    <Star className="w-3 h-3" /> Recognition
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-1 shadow-sm drop-shadow-lg">Rewards & Awards</h3>
-                  <p className="text-sm text-gray-300 drop-shadow-md">Celebrating top achievers on the grand stage.</p>
-                </div>
-              </div>
-
-              {/* Financial Freedom / Dream Lifestyle Image */}
-              <div className="relative rounded-3xl overflow-hidden group shadow-xl h-[300px] border border-[#28485A]/40">
-                <div className="absolute inset-0 bg-[#071E2C]/40 mix-blend-color z-10 transition-opacity duration-700 group-hover:opacity-0"></div>
-                <img 
-                  src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1000&auto=format&fit=crop" 
-                  alt="Financial Freedom Lifestyle" 
-                  className="w-full h-full object-cover object-center transform transition-transform duration-700 group-hover:scale-105"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#071E2C] via-[#071E2C]/40 to-transparent z-20"></div>
-                <div className="absolute bottom-0 left-0 p-5 md:p-6 z-30">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1B3343]/80 border border-[#6F9DB5]/30 text-[#6F9DB5] text-[10px] font-bold uppercase tracking-widest mb-2 backdrop-blur-md">
-                    <Sparkles className="w-3 h-3" /> Lifestyle
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-1 shadow-sm drop-shadow-lg">Financial Freedom</h3>
-                  <p className="text-sm text-gray-300 drop-shadow-md">Unlock the luxury life of your dreams.</p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          {/* The Model */}
-          <div className="text-center space-y-8 py-8 border-y border-[#8FA3AF]/30">
-            <h2 className="text-2xl md:text-3xl font-semibold text-white uppercase tracking-wider">Future Grow Model</h2>
-            
-            <div className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8">
-              <div className="font-bold text-2xl text-gray-300">LEARN</div>
-              <ArrowRight className="text-gray-600 hidden md:block" />
-              <div className="font-bold text-2xl text-gray-300">WORK</div>
-              <ArrowRight className="text-gray-600 hidden md:block" />
-              <div className="font-bold text-2xl text-gray-300">BUILD</div>
-              <ArrowRight className="text-gray-600 hidden md:block" />
-              <div className="font-bold text-2xl text-[#6F9DB5]">GROW</div>
-            </div>
-
-            <p className="text-lg text-white max-w-2xl mx-auto">
-              Build your knowledge. Develop your skills. Build your team. Work consistently toward your goals.
-            </p>
-          </div>
-
-          {/* Our Vision Expansion */}
-          <div className="bg-gradient-to-br from-[#1B3343]/20 to-[#071E2C] rounded-3xl p-8 md:p-12 border border-[#8FA3AF]/30">
-            <div className="flex items-center gap-3 mb-6">
-              <Globe2 className="w-8 h-8 text-gray-300" />
-              <h2 className="text-2xl md:text-3xl font-bold text-white uppercase tracking-wide">Our Vision</h2>
-            </div>
-            <h3 className="text-xl md:text-2xl font-semibold text-gray-200 mb-6 uppercase tracking-wider">
-              Building a Stronger Future, Together
-            </h3>
-            <p className="text-lg text-white leading-relaxed mb-6">
-              Future Grow’s vision is to become a trusted and growing platform that creates <strong className="text-[#6F9DB5] font-medium">long-term opportunities for people, families and communities</strong>.
-            </p>
-            <p className="text-lg text-white leading-relaxed">
-              We believe the future belongs to those who <strong className="text-white font-medium">think bigger, learn continuously, work consistently and grow together</strong>.
-            </p>
-          </div>
-
-          {/* Grid: Dream & Focus */}
-          <div className="grid md:grid-cols-2 gap-4 md:gap-8">
-            <div className="bg-[#132C3C]/50 rounded-2xl md:rounded-3xl p-5 md:p-8 border border-[#8FA3AF]/30 flex flex-col justify-center">
-              <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-                <Rocket className="w-5 h-5 md:w-6 md:h-6 text-gray-300" />
-                <h2 className="text-lg md:text-xl font-semibold text-white uppercase tracking-wider">Our Bigger Dream</h2>
-              </div>
-              <p className="text-sm md:text-base text-white leading-relaxed mb-3 md:mb-4">
-                In the coming years, we aim to <strong className="text-[#6F9DB5] font-medium">develop and expand Future Grow on a much larger scale</strong>, reaching more cities, more communities and more people.
-              </p>
-              <p className="text-sm md:text-base text-gray-300 leading-relaxed">
-                Our goal is to build a strong ecosystem where people can learn new skills, discover business opportunities, develop leadership qualities and work together toward their financial goals.
-              </p>
-            </div>
-            <div className="bg-[#132C3C]/50 rounded-2xl md:rounded-3xl p-5 md:p-8 border border-[#8FA3AF]/30">
-              <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-                <Sprout className="w-5 h-5 md:w-6 md:h-6 text-[#6F9DB5]" />
-                <h2 className="text-lg md:text-xl font-semibold text-white uppercase tracking-wider">Our Future Focus</h2>
-              </div>
-              <div className="text-[11px] md:text-sm font-semibold tracking-widest text-gray-300 uppercase mb-4 md:mb-6 flex flex-wrap items-center gap-1.5 md:gap-2">
-                Expand <ArrowRight className="w-3 h-3 md:w-4 md:h-4" /> Educate <ArrowRight className="w-3 h-3 md:w-4 md:h-4" /> Empower <ArrowRight className="w-3 h-3 md:w-4 md:h-4" /> Grow
-              </div>
-              <ul className="space-y-2.5 md:space-y-3 text-sm md:text-base text-gray-300">
-                <li className="flex items-start gap-2 md:gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5] mt-1.5 md:mt-2 min-w-[6px]"></div>
-                  <span className="leading-tight md:leading-normal">Build a strong and professional organization</span>
-                </li>
-                <li className="flex items-start gap-2 md:gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5] mt-1.5 md:mt-2 min-w-[6px]"></div>
-                  <span className="leading-tight md:leading-normal">Expand our network across India and beyond</span>
-                </li>
-                <li className="flex items-start gap-2 md:gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5] mt-1.5 md:mt-2 min-w-[6px]"></div>
-                  <span className="leading-tight md:leading-normal">Provide quality products and business education</span>
-                </li>
-                <li className="flex items-start gap-2 md:gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5] mt-1.5 md:mt-2 min-w-[6px]"></div>
-                  <span className="leading-tight md:leading-normal">Develop thousands of capable leaders</span>
-                </li>
-                <li className="flex items-start gap-2 md:gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5] mt-1.5 md:mt-2 min-w-[6px]"></div>
-                  <span className="leading-tight md:leading-normal">Create opportunities to grow through their efforts</span>
-                </li>
-                <li className="flex items-start gap-2 md:gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#6F9DB5] mt-1.5 md:mt-2 min-w-[6px]"></div>
-                  <span className="leading-tight md:leading-normal">Build a long-term sustainable organization</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Our Belief */}
-          <div className="bg-[#071E2C] rounded-3xl p-8 md:p-12 border-l-4 border-[#86B4C9] shadow-xl relative overflow-hidden">
-             <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                <Gem className="w-40 h-40 text-[#6F9DB5]" />
+          <div className="bg-[#0B1E2D] rounded-2xl p-8 md:p-12 border border-[#1C3A50] relative z-10 shadow-xl">
+             <div className="flex items-center justify-center gap-2 text-sm font-bold tracking-widest text-gray-400 uppercase mb-6">
+               <Users className="w-5 h-5" /> LIVE COMMUNITY
              </div>
-             <div className="relative z-10">
-                <h2 className="text-sm font-semibold tracking-widest text-[#86B4C9] uppercase mb-4 flex items-center gap-2">
-                  <Gem className="w-4 h-4" /> Our Belief
-                </h2>
-                <h3 className="text-2xl md:text-3xl font-semibold text-white mb-6 leading-tight italic">
-                  “When one person grows, it is success.<br />
-                  When thousands grow together, it becomes a movement.”
-                </h3>
-                <p className="text-lg text-white">
-                  Future Grow wants to create a future where <strong className="text-[#6F9DB5] font-medium">hard work, teamwork, knowledge and leadership</strong> can open new possibilities for people.
-                </p>
+             <div className="flex items-center justify-center gap-3 mb-6">
+               <div className="w-4 h-4 rounded-full bg-[#35B779] animate-pulse shadow-[0_0_10px_rgba(53,183,121,0.6)]"></div>
+               <h3 className="text-6xl md:text-7xl font-bold text-white tracking-tight">{communityCount}<span className="text-[#6F9DB5]">+</span></h3>
+             </div>
+             <div className="inline-block px-5 py-2 bg-[#112738] border border-[#1C3A50] text-xs font-bold text-[#35B779] uppercase tracking-wider rounded-full shadow-inner">
+               GROWING DAILY ACROSS THE NATION
              </div>
           </div>
+        </div>
 
-          {/* Conclusion */}
-          <div className="text-center pb-12 pt-8">
-            <div className="flex justify-center mb-6">
-               <Flame className="w-12 h-12 text-gray-300" />
+        {/* COMPANY UPTIME */}
+        <div className="bg-[#0B1E2D] rounded-2xl p-8 md:p-12 border border-[#1C3A50] text-center shadow-xl">
+          <div className="flex items-center justify-center gap-2 text-sm font-bold tracking-widest text-gray-400 uppercase mb-8">
+            <Clock className="w-5 h-5" /> COMPANY UPTIME
+          </div>
+          
+          <div className="flex items-center justify-center gap-6 md:gap-8 mb-8">
+            <div className="flex flex-col items-center">
+              <span className="text-5xl md:text-6xl font-bold text-[#D99A4A] drop-shadow-md">{uptime.years}</span>
+              <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest mt-2">Yrs</span>
             </div>
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 tracking-tight">
-              FUTURE GROW
-            </h2>
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-center text-lg md:text-xl font-semibold tracking-widest text-gray-300 uppercase mb-12">
-              <span>Dream Big</span>
-              <span className="hidden md:block w-2 h-2 rounded-full bg-[#6F9DB5]"></span>
-              <span>Work Smart</span>
-              <span className="hidden md:block w-2 h-2 rounded-full bg-[#6F9DB5]"></span>
-              <span>Grow Together</span>
+            <span className="text-3xl md:text-4xl font-bold text-[#D99A4A]/50 pb-6">:</span>
+            <div className="flex flex-col items-center">
+              <span className="text-5xl md:text-6xl font-bold text-[#D99A4A] drop-shadow-md">{uptime.months}</span>
+              <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest mt-2">Mos</span>
             </div>
-            <div className="bg-[#1B3343]/20 border border-[#8FA3AF]/30 rounded-xl p-8 max-w-3xl mx-auto">
-               <p className="text-xl text-gray-200 font-medium italic">
-                 Our vision is not just to build a company.<br/>
-                 Our vision is to build a strong community that grows together for years to come.
-               </p>
+            <span className="text-3xl md:text-4xl font-bold text-[#D99A4A]/50 pb-6">:</span>
+            <div className="flex flex-col items-center">
+              <span className="text-5xl md:text-6xl font-bold text-[#D99A4A] drop-shadow-md">{uptime.days}</span>
+              <span className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest mt-2">Days</span>
             </div>
           </div>
-
-        </div>
-      </section>
-
-      {/* Live Statistics Section Moved to Bottom */}
-      <section className="bg-gradient-to-br from-[#0E2535] to-[#071E2C] border-y border-[#28485A] py-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[#071E2C] opacity-50 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="absolute top-0 left-0 p-4 opacity-10">
-           <Globe2 className="w-64 h-64 text-[#6F9DB5]" />
-        </div>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4">Our Growing Network</h2>
-            <div className="w-24 h-1 bg-[#6F9DB5] mx-auto rounded-full"></div>
+          
+          <div className="inline-block px-8 py-3 bg-[#081824] border border-[#1C3A50] rounded-xl mb-8 shadow-inner">
+            <span className="text-3xl md:text-4xl font-mono text-[#8FA3AF] tracking-[0.2em]">{uptime.timeString}</span>
           </div>
+          
+          <div className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-widest">
+            SUCCESSFULLY RUNNING & CHANGING LIVES
+          </div>
+        </div>
 
-          <div className="flex flex-col gap-10 max-w-5xl mx-auto w-full">
-            
-            {/* Community Counter */}
-            <div className="bg-[#132C3C] rounded-2xl p-8 border-2 border-[#6F9DB5]/40 text-center shadow-[0_0_40px_rgba(111,157,181,0.15)] relative overflow-hidden group hover:border-[#6F9DB5] transition-all duration-300">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#6F9DB5] rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
-              
-              <div className="flex items-center justify-center gap-2 mb-6">
-                <Users className="w-8 h-8 text-[#6F9DB5]" />
-                <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">Live Community</h3>
-              </div>
-              <div className="flex items-center justify-center gap-4 mb-4">
-                <span className="relative flex h-5 w-5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#35B779] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-5 w-5 bg-[#35B779]"></span>
-                </span>
-                <div className="text-6xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-[#DDE2E5]">
-                  {liveStats.community.toLocaleString('en-IN')}
-                  <span className="text-[#6F9DB5] text-5xl ml-1">+</span>
-                </div>
-              </div>
-              <div className="inline-block bg-[#1B3343] border border-[#28485A] px-6 py-2 rounded-full">
-                <p className="text-sm text-[#35B779] font-semibold uppercase tracking-wider">Growing Daily Across The Nation</p>
-              </div>
+        {/* Join WhatsApp Channel */}
+        <div className="bg-[#0B1E2D] rounded-2xl p-8 md:p-12 border border-[#35B779]/30 text-center relative overflow-hidden shadow-xl mt-12">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#35B779]/5 to-transparent"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-center gap-2 text-sm font-bold tracking-widest text-[#35B779] uppercase mb-6">
+              <MessageCircle className="w-5 h-5" /> OFFICIAL WHATSAPP CHANNEL
             </div>
-
-            {/* Live Uptime Timer */}
-            <div className="bg-[#132C3C] rounded-2xl p-8 border-2 border-[#28485A] text-center shadow-lg relative overflow-hidden group hover:border-[#6F9DB5]/60 transition-all duration-300">
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#D99A4A] rounded-full blur-[80px] opacity-10 group-hover:opacity-20 transition-opacity"></div>
-
-              <div className="flex items-center justify-center gap-2 mb-6">
-                <Clock className="w-8 h-8 text-[#D99A4A]" />
-                <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">Company Uptime</h3>
-              </div>
-              
-              <div className="flex items-baseline justify-center gap-4 text-4xl md:text-5xl font-bold text-white mb-4">
-                <div className="flex flex-col items-center">
-                  <span className="text-[#D99A4A] leading-none">{liveStats.years}</span>
-                  <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-widest mt-2">Yrs</span>
-                </div>
-                <span className="text-[#8FA3AF] text-3xl font-light">:</span>
-                <div className="flex flex-col items-center">
-                  <span className="text-[#D99A4A] leading-none">{liveStats.months}</span>
-                  <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-widest mt-2">Mos</span>
-                </div>
-                <span className="text-[#8FA3AF] text-3xl font-light">:</span>
-                <div className="flex flex-col items-center">
-                  <span className="text-[#D99A4A] leading-none">{liveStats.days}</span>
-                  <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-widest mt-2">Days</span>
-                </div>
-              </div>
-              
-              <div className="text-2xl md:text-3xl font-mono text-white mt-2 font-semibold tracking-widest bg-[#0E2535] inline-block px-6 py-3 rounded-xl border border-[#28485A] shadow-inner mb-4">
-                {String(liveStats.hours).padStart(2, '0')}<span className="text-[#6F9DB5]">:</span>{String(liveStats.minutes).padStart(2, '0')}<span className="text-[#6F9DB5]">:</span>{String(liveStats.seconds).padStart(2, '0')}
-              </div>
-              
-              <div>
-                <p className="text-sm text-gray-300 font-semibold uppercase tracking-wider">Successfully Running & Changing Lives</p>
-              </div>
-            </div>
-
-            {/* WhatsApp Community Box */}
-            <a 
-              href="https://whatsapp.com/channel/0029VbCd2L6CsU9Z41Fhyg11" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="bg-gradient-to-br from-[#132C3C] to-[#0A1A24] rounded-2xl p-8 border-2 border-[#25D366]/40 text-center shadow-[0_0_40px_rgba(37,211,102,0.15)] relative overflow-hidden group hover:border-[#25D366] hover:-translate-y-1 transition-all duration-300 block"
-            >
-              <div className="absolute top-0 right-0 w-40 h-40 bg-[#25D366] rounded-full blur-[90px] opacity-10 group-hover:opacity-30 transition-opacity"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#25D366] rounded-full blur-[80px] opacity-10 group-hover:opacity-20 transition-opacity"></div>
-              
-              <div className="flex items-center justify-center gap-2 mb-5 relative z-10">
-                <MessageCircle className="w-8 h-8 text-[#25D366]" />
-                <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">Official WhatsApp Channel</h3>
-              </div>
-              
-              <div className="flex flex-col items-center justify-center gap-3 mb-8 relative z-10">
-                <div className="text-3xl md:text-4xl font-bold text-white">
-                  Join Future Grow on WhatsApp
-                </div>
-                <p className="text-[#8FA3AF] max-w-lg mx-auto">
-                  Stay updated with our latest news, exclusive announcements, and connect directly with the growing community in just one click!
-                </p>
-              </div>
-              
-              <div className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-8 py-3.5 rounded-full font-bold transition-colors shadow-[0_4px_20px_rgba(37,211,102,0.4)] relative z-10 text-lg">
-                <MessageCircle className="w-5 h-5 fill-current" />
-                <span>Join WhatsApp Channel</span>
-              </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Join Future Grow on WhatsApp</h2>
+            <p className="text-base md:text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
+              Stay updated with our latest news, exclusive announcements, and connect directly with the growing community in just one click!
+            </p>
+            <a href="https://whatsapp.com/channel/0029VbCd2L6CsU9Z41Fhyg11" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#35B779] hover:bg-[#2A9D66] text-white font-bold rounded-full shadow-[0_0_30px_rgba(53,183,121,0.3)] transition-all text-lg">
+              <MessageCircle className="w-6 h-6 fill-current" /> Join WhatsApp Channel
             </a>
+          </div>
+        </div>
 
-            {/* YouTube Channel Box */}
-            <a 
-              href="https://www.youtube.com/@FutureGrow-u7z" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="bg-gradient-to-br from-[#132C3C] to-[#0A1A24] rounded-2xl p-8 border-2 border-[#FF0000]/40 text-center shadow-[0_0_40px_rgba(255,0,0,0.15)] relative overflow-hidden group hover:border-[#FF0000] hover:-translate-y-1 transition-all duration-300 block"
-            >
-              <div className="absolute top-0 right-0 w-40 h-40 bg-[#FF0000] rounded-full blur-[90px] opacity-10 group-hover:opacity-30 transition-opacity"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#FF0000] rounded-full blur-[80px] opacity-10 group-hover:opacity-20 transition-opacity"></div>
-              
-              <div className="flex items-center justify-center gap-2 mb-5 relative z-10">
-                <Youtube className="w-8 h-8 text-[#FF0000]" />
-                <h3 className="text-sm font-semibold tracking-widest text-gray-300 uppercase">Official YouTube Channel</h3>
-              </div>
-              
-              <div className="flex flex-col items-center justify-center gap-3 mb-8 relative z-10">
-                <div className="text-3xl md:text-4xl font-bold text-white">
-                  Subscribe to Future Grow
-                </div>
-                <p className="text-[#8FA3AF] max-w-lg mx-auto">
-                  Watch our latest presentations, training videos, and community updates. Subscribe and hit the bell icon to never miss an update!
-                </p>
-              </div>
-              
-              <div className="inline-flex items-center justify-center gap-2 bg-[#FF0000] hover:bg-[#cc0000] text-white px-8 py-3.5 rounded-full font-bold transition-colors shadow-[0_4px_20px_rgba(255,0,0,0.4)] relative z-10 text-lg">
-                <Youtube className="w-5 h-5 fill-current" />
-                <span>Subscribe on YouTube</span>
-              </div>
+        {/* Subscribe YouTube */}
+        <div className="bg-[#0B1E2D] rounded-2xl p-8 md:p-12 border border-red-500/30 text-center relative overflow-hidden shadow-xl mt-6">
+          <div className="absolute inset-0 bg-gradient-to-b from-red-500/5 to-transparent"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-center gap-2 text-sm font-bold tracking-widest text-red-500 uppercase mb-6">
+              <Youtube className="w-5 h-5" /> OFFICIAL YOUTUBE CHANNEL
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Subscribe to Future Grow</h2>
+            <p className="text-base md:text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
+              Watch our latest presentations, training videos, and community updates. Subscribe and hit the bell icon to never miss an update!
+            </p>
+            <a href="https://youtube.com/@futuregrow-u7z?si=qXt2vgz9WNtDRpac" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full shadow-[0_0_30px_rgba(220,38,38,0.3)] transition-all text-lg">
+              <Youtube className="w-6 h-6 fill-current" /> Subscribe on YouTube
             </a>
-            
           </div>
         </div>
-      </section>
 
-      {/* Disclaimer */}
-      <section className="py-8 bg-[#071E2C]">
-        <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#132C3C] rounded-xl p-6 border border-[#35576A]/50 text-xs text-gray-300 leading-relaxed text-center">
-            <strong className="text-gray-300">Important:</strong> Future growth and income are not guaranteed. Results depend on individual effort, performance, business conditions and applicable company policies. Please understand the products, compensation plan, terms and applicable legal/tax requirements before participating. Your income, if any, depends on your performance, eligibility, sales/team activity and the applicable company plan and policies.
-          </div>
+        {/* Disclaimer */}
+        <div className="bg-[#112738] rounded-xl p-6 md:p-8 text-center border border-[#1C3A50] mt-12 mb-8">
+          <p className="text-sm text-gray-400 leading-relaxed font-light">
+            <strong className="text-white font-medium">Important:</strong> Future growth and income are not guaranteed. Results depend on individual effort, performance, business conditions and applicable company policies. Please understand the products, compensation plan, terms and applicable legal/tax requirements before participating. Your income, if any, depends on your performance, eligibility, sales/team activity and the applicable company plan and policies.
+          </p>
         </div>
-      </section>
 
+      </div>
     </div>
   );
 }
+

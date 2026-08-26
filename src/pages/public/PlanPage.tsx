@@ -60,13 +60,10 @@ export function PlanPage() {
                 const defaultChoices = !isPremium ? [
                   { name: 'Suit Length (navy blue Colour - Single Set)', comingSoon: false },
                   { name: 'Pant (navy blue Colour - Single Set)', comingSoon: false },
-                  { name: 'Banarasi Saree (Single Piece)', comingSoon: false },
                   { name: 'Healthcare & Wellness Package', comingSoon: true }
                 ] : [
                   { name: 'Suit Length & Pant (Green Colour)', comingSoon: false },
                   { name: 'Suit Length & Pant (Navy Blue Colour)', comingSoon: false },
-                  { name: 'Double Banarasi Saree (Special Edition)', comingSoon: false },
-                  { name: 'Suit Length & Banarasi Saree Combo', comingSoon: false }
                 ];
 
                 const productList = pkg.productChoices && pkg.productChoices.length > 0

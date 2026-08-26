@@ -57,11 +57,11 @@ export function AdminDashboardPage() {
     (u.transactions || []).forEach(tx => {
       if (tx.type === 'Deposit') {
         if (tx.status === 'Approved' || (!tx.status && u.status === 'Active')) {
-          calculatedBusiness += tx.amount || 8599;
+          calculatedBusiness += tx.amount || 6699;
           totalApprovedDeposits++;
         } else if (tx.status === 'Pending') {
           totalPendingDeposits++;
-          totalPendingDepositAmount += tx.amount || 8599;
+          totalPendingDepositAmount += tx.amount || 6699;
         }
       }
     });

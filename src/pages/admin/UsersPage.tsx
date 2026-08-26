@@ -128,7 +128,7 @@ export function UsersPage() {
         position: addFormData.position || 'Left',
         password: addFormData.password?.trim() || '123456',
         utrNumber: isFree ? freeUtr : (addFormData.utrNumber?.trim() || 'MANUAL_ADMIN_ADD'),
-        paymentAmount: isFree ? 0 : ((addFormData.package?.includes('Basic') || addFormData.package?.includes('6699')) ? 6699 : 8599),
+        paymentAmount: isFree ? 0 : ((addFormData.package?.includes('Basic') || addFormData.package?.includes('6699')) ? 6699 : 6699),
         status: isFree ? 'Active' : addFormData.status,
         isFreeId: isFree,
         insertInBetween: isBetween,
@@ -293,7 +293,7 @@ export function UsersPage() {
 
   const handleConfirmActivate = () => {
     if (!activateModalUser) return;
-    const pkgPrice = activatePackage === 'Basic' ? 6699 : 8599;
+    const pkgPrice = activatePackage === 'Basic' ? 6699 : 6699;
     activateUserAccount(activateModalUser.id, {
       package: activatePackage,
       selectedProduct: activateProduct,
@@ -618,7 +618,7 @@ export function UsersPage() {
                         }
 
                         const isBasic = user.package?.toLowerCase().includes('basic') || user.paymentAmount === 6699;
-                        const price = user.paymentAmount || (isBasic ? 6699 : 8599);
+                        const price = user.paymentAmount || 6699;
                         const prod = user.selectedProduct || (isBasic ? 'Shuit lanth (Single Piece)' : 'Shuit lanth & paint');
                         return (
                           <div>
@@ -976,7 +976,7 @@ export function UsersPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <span className="text-gray-300 block">Payment Amount:</span>
-                    <span className="text-[#35B779] font-semibold text-sm">₹{viewUserModal.paymentAmount || 8599}</span>
+                    <span className="text-[#35B779] font-semibold text-sm">₹{viewUserModal.paymentAmount || 6699}</span>
                   </div>
                   <div>
                     <span className="text-gray-300 block">Transaction ID / UTR Number:</span>
@@ -1139,15 +1139,12 @@ export function UsersPage() {
                         <>
                           <option value="Suit Length (navy blue Colour - Single Set)">1. Suit Length (navy blue Colour - Single Set)</option>
                           <option value="Pant (Green Colour - Single Set)">2. Pant (Green Colour - Single Set)</option>
-                          <option value="Banarasi Saree (Single Piece)">3. Banarasi Saree (Single Piece)</option>
                           <option value="Healthcare & Wellness Package" disabled>4. Healthcare & Wellness Package (Coming Soon)</option>
                         </>
                       ) : (
                         <>
                           <option value="Suit Length & Pant (Green Colour)">1. Suit Length & Pant (Green Colour)</option>
                           <option value="Suit Length & Pant (Navy Blue Colour)">2. Suit Length & Pant (Navy Blue Colour)</option>
-                          <option value="Double Banarasi Saree (Special Edition)">3. Double Banarasi Saree (Special Edition)</option>
-                          <option value="Suit Length & Banarasi Saree Combo">4. Suit Length & Banarasi Saree Combo</option>
                         </>
                       )}
                     </select>
@@ -1436,7 +1433,7 @@ export function UsersPage() {
       {/* Activate Member / Free ID Modal */}
       {activateModalUser && (() => {
         const sponsor = users.find(u => u.id === activateModalUser.sponsorId);
-        const pkgPrice = activatePackage === 'Basic' ? 6699 : 8599;
+        const pkgPrice = activatePackage === 'Basic' ? 6699 : 6699;
         const directCommission = activatePackage === 'Basic' ? 0 : 1500;
 
         return (
@@ -1974,15 +1971,12 @@ export function UsersPage() {
                           <>
                             <option value="Suit Length (navy blue Colour - Single Set)">1. Suit Length (navy blue Colour - Single Set)</option>
                             <option value="Pant (Green Colour - Single Set)">2. Pant (Green Colour - Single Set)</option>
-                            <option value="Banarasi Saree (Single Piece)">3. Banarasi Saree (Single Piece)</option>
                             <option value="Healthcare & Wellness Package" disabled>4. Healthcare & Wellness Package (Coming Soon)</option>
                           </>
                         ) : (
                           <>
                             <option value="Suit Length & Pant (Green Colour)">1. Suit Length & Pant (Green Colour)</option>
                             <option value="Suit Length & Pant (Navy Blue Colour)">2. Suit Length & Pant (Navy Blue Colour)</option>
-                            <option value="Double Banarasi Saree (Special Edition)">3. Double Banarasi Saree (Special Edition)</option>
-                            <option value="Suit Length & Banarasi Saree Combo">4. Suit Length & Banarasi Saree Combo</option>
                           </>
                         )}
                       </select>

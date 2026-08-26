@@ -89,7 +89,7 @@ export function BinaryTreePage() {
           iconColor={iconColorClass}
           isYou={user.id === activeUserId}
           packageName={user.package || (user.paymentAmount === 6699 ? 'Basic' : 'Premium')}
-          paymentAmount={user.paymentAmount || (user.package?.includes('Basic') ? 6699 : 8599)}
+          paymentAmount={user.paymentAmount || (user.package?.includes('Basic') ? 6699 : 6699)}
         />
         {hasChildren && (
           <ul>
@@ -224,7 +224,7 @@ function TreeNode({ name, id, left, right, active, empty, onClick, iconColor, is
           <div className={`text-[9px] font-bold px-1 py-0.5 rounded mt-1 truncate ${
             isBasic ? 'bg-[#6F9DB5]/20 text-[#6F9DB5] border border-[#6F9DB5]/40' : 'bg-[#35B779]/20 text-[#35B779] border border-[#35B779]/40'
           }`}>
-            {packageName} (₹{(paymentAmount || (isBasic ? 6699 : 8599)).toLocaleString('en-IN')})
+            {packageName} (₹{(paymentAmount || 6699).toLocaleString('en-IN')})
           </div>
         )}
         <div className="flex justify-between text-[9px] font-medium border-t border-[#28485A]/30 pt-1 mt-1 px-1">

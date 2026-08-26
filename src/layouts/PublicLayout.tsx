@@ -128,7 +128,7 @@ export function PublicLayout() {
                 <Network className="h-6 w-6 text-blue-500" />
                 <span className="text-xl font-semibold tracking-tight text-white">Future Grow</span>
               </Link>
-              <p className="text-sm text-[#8FA3AF] max-w-sm">
+              <p className="text-sm text-[#8FA3AF] max-w-sm mb-6">
                 Empowering individuals through a revolutionary binary network marketing plan. Build your team, grow your income, and achieve financial freedom.
               </p>
             </div>
