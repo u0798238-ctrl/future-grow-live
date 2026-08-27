@@ -115,13 +115,13 @@ export function UserDashboardPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto max-w-full">
           {/* Referral Code Box */}
-          <div className="bg-[#071E2C] border-2 border-[#6F9DB5]/40 shadow-[0_0_15px_rgba(111,157,181,0.15)] rounded-xl px-3.5 py-2 flex items-center justify-between gap-3 text-xs w-full sm:w-auto flex-1 sm:flex-none">
-            <span className="text-gray-300 shrink-0">Referral Code: <strong className="text-white font-mono text-sm ml-1">{sponsorCode}</strong></span>
+          <div className="bg-[#071E2C] border-2 border-[#6F9DB5]/40 shadow-[0_0_15px_rgba(111,157,181,0.15)] rounded-xl px-3 py-2 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs w-full sm:w-auto flex-1 sm:flex-none max-w-full">
+            <span className="text-gray-300 truncate">Referral Code: <strong className="text-white font-mono text-sm ml-1">{sponsorCode}</strong></span>
             <button 
               onClick={handleCopyCode} 
-              className="text-[#6F9DB5] hover:text-white font-semibold transition-colors flex items-center gap-1 bg-[#1B3343]/60 hover:bg-[#1B3343] px-2.5 py-1 rounded-lg border border-[#28485A]/50 cursor-pointer shrink-0"
+              className="text-[#6F9DB5] hover:text-white font-semibold transition-colors flex items-center gap-1 bg-[#1B3343]/60 hover:bg-[#1B3343] px-2.5 py-1 rounded-lg border border-[#28485A]/50 cursor-pointer shrink-0 ml-auto"
               title="Copy Referral Code"
             >
               {copiedCode ? <Check className="w-3.5 h-3.5 text-[#35B779]" /> : <Copy className="w-3.5 h-3.5" />}
