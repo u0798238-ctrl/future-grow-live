@@ -29,7 +29,7 @@ export function ThePeopleSupportPage() {
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-wide flex items-center justify-center gap-3 flex-wrap drop-shadow-md">
             <span>🌱</span>
-            <span>Future Grow & The People Support</span>
+            <span>THE PEOPLE SUPPORT</span>
           </h1>
           <p className="text-xl sm:text-2xl md:text-3xl font-bold text-[#35B779]">
             हर जरूरतमंद के साथ, हर कदम पर सहयोग
@@ -184,7 +184,7 @@ export function ThePeopleSupportPage() {
         <div className="bg-gradient-to-r from-[#1B3343] via-[#132C3C] to-[#1B3343] rounded-2xl p-6 sm:p-10 border border-emerald-500/40 shadow-xl space-y-6 text-center relative overflow-hidden">
           <div className="space-y-4 max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold text-xs sm:text-sm border border-emerald-500/40">
-              <span>🌱</span> Future Grow × The People Support
+              <span>🌱</span> THE PEOPLE SUPPORT
             </div>
             
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">

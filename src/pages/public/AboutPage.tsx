@@ -24,64 +24,64 @@ export function AboutPage() {
       icon: <Zap className="w-7 h-7 text-amber-400" />,
       badge: "1. ⚡ Fast Withdrawal",
       badgeColor: "bg-amber-500/15 text-amber-300 border-amber-500/30",
-      title: "Fast Withdrawal",
-      desc: "Eligible members can access fast and instant withdrawals. Once standard verification is complete, payouts can be credited directly to your bank account within 24 hours as per company policy."
+      title: "फास्ट विथड्रॉल (Fast Withdrawal)",
+      desc: "Eligible members के लिए Instant Withdrawal की सुविधा उपलब्ध हो सकती है। निर्धारित प्रक्रिया पूरी होने के बाद payment 24 घंटे के भीतर account में credit होने की व्यवस्था योजना के अनुसार की जा सकती है।"
     },
     {
       icon: <CheckCircle2 className="w-7 h-7 text-emerald-400" />,
       badge: "2. 🚫 No Unnecessary Conditions",
       badgeColor: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
-      title: "Simple & Transparent Rules",
-      desc: "A clean, straightforward system designed to avoid complex hurdles like unnecessary 2:1 ratios, ensuring honest and transparent operations under our standard withdrawal guidelines."
+      title: "सरल और पारदर्शी नियम",
+      desc: "कंपनी की निर्धारित withdrawal policy के अनुसार अनावश्यक 2:1 जैसी conditions से बचते हुए सरल और transparent system रखने का प्रयास किया जाएगा।"
     },
     {
       icon: <IndianRupee className="w-7 h-7 text-[#35B779]" />,
-      badge: "3. 💰 Enhanced Income Opportunity",
+      badge: "3. 💰 बेहतर Income का अवसर",
       badgeColor: "bg-[#35B779]/15 text-[#35B779] border-[#35B779]/30",
-      title: "High-Earning Potential",
-      desc: "Future Grow provides rewarding opportunities based on your dedication, team leadership, and performance. Consistent effort and strategic planning can unlock steady, scalable earnings."
+      title: "मेहनत के साथ बेहतर Income",
+      desc: "Future Grow में आपकी मेहनत, Team Building और Performance के आधार पर income बढ़ाने का अवसर हो सकता है। सही planning और लगातार मेहनत से समय के साथ बेहतर earning potential बनाया जा सकता है।"
     },
     {
       icon: <TrendingUp className="w-7 h-7 text-blue-400" />,
       badge: "4. 📈 Future Growth",
       badgeColor: "bg-blue-500/15 text-blue-300 border-blue-500/30",
-      title: "Massive Long-Term Growth",
-      desc: "Small beginnings today lay the foundation for substantial long-term growth. The stronger your team network expands, the greater your prospects to scale new financial heights."
+      title: "Future में Growth का बड़ा अवसर",
+      desc: "आज की छोटी शुरुआत आने वाले समय में बड़ी growth का आधार बन सकती है। जितना मजबूत आपका network और team होगा, उतना ही आपके लिए आगे बढ़ने का अवसर बन सकता है।"
     },
     {
       icon: <Users className="w-7 h-7 text-purple-400" />,
       badge: "5. 🤝 Direct Income",
       badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
-      title: "Direct Referral Benefits",
-      desc: "Earn substantial direct income benefits on personal recommendations (e.g., up to ₹1,500 on eligible direct referrals subject to terms and active plan criteria)."
+      title: "Direct Income Benefit",
+      desc: "Eligible plan और applicable rules के अनुसार Direct Income का opportunity उपलब्ध हो सकता है। (उदाहरण: Direct Referral पर ₹1,500 तक का benefit, यदि संबंधित plan की पात्रता और शर्तें पूरी होती हैं)।"
     },
     {
       icon: <Layers className="w-7 h-7 text-cyan-400" />,
       badge: "6. 💎 Matching & Level Income",
       badgeColor: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
-      title: "Matching & Multi-Level Earnings",
-      desc: "Unlock matching bonuses and structured level payouts as your team grows. Your earnings expand beyond individual efforts into compound team performance."
+      title: "Matching & Level Earning",
+      desc: "Team के साथ काम करने पर applicable business plan के अनुसार Matching Income और Level Income का अवसर भी मिल सकता है। इससे आपकी earning केवल direct work तक सीमित न रहकर team performance और network growth से भी जुड़ सकती है।"
     },
     {
       icon: <ShieldCheck className="w-7 h-7 text-rose-400" />,
       badge: "7. 🛡️ Family & Future Security",
       badgeColor: "bg-rose-500/15 text-rose-300 border-rose-500/30",
-      title: "Support for You & Your Family",
-      desc: "More than an income platform: Future Grow works to provide accidental assistance, educational backing, family aid, and vital community welfare for eligible members."
+      title: "आपके और आपके परिवार के लिए Support",
+      desc: "Future Grow का उद्देश्य केवल income opportunity तक सीमित नहीं है। Eligible members के लिए कंपनी की निर्धारित policy और eligibility के अनुसार Accident Support, Education Support, Family Support तथा अन्य Security Benefits उपलब्ध कराने की दिशा में कार्य किया जा सकता है।"
     },
     {
       icon: <Clock className="w-7 h-7 text-indigo-400" />,
       badge: "8. ⏰ Time Freedom & Financial Growth",
       badgeColor: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
-      title: "Time Freedom & Independence",
-      desc: "Build a resilient team and establish true autonomy over your daily schedule. Attain financial independence backed by continuous performance and dedicated teamwork."
+      title: "Time Freedom & Growth",
+      desc: "एक मजबूत network और अच्छी team बनाने के साथ व्यक्ति को अपने समय को बेहतर तरीके से manage करने का अवसर मिल सकता है। Time Freedom और Financial Growth मेहनत, performance और plan की पात्रता के अनुसार प्राप्त होने की संभावना पर आधारित होंगे।"
     },
     {
       icon: <Award className="w-7 h-7 text-yellow-400" />,
       badge: "9. 🏆 Reward & Recognition",
       badgeColor: "bg-yellow-500/15 text-yellow-300 border-yellow-500/30",
-      title: "Honoring Effort & Excellence",
-      desc: "For leaders working with honesty and determination, Future Grow recognizes excellence with prestigious ranks, physical milestone gifts, tours, and company awards."
+      title: "मेहनत और लगन का Reward",
+      desc: "Future Grow में जो लोग ईमानदारी, मेहनत, लगन और लगातार प्रयास के साथ काम करेंगे, उनके performance के अनुसार कंपनी की reward policy के तहत अलग-अलग rewards और recognition दिए जा सकते हैं।"
     }
   ];
 
