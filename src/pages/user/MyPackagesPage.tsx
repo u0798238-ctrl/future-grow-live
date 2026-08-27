@@ -22,18 +22,19 @@ export function MyPackagesPage() {
     };
   }, []);
 
+  const isOnlyReg = Boolean(currentUser.isFreeId || currentUser.package?.toLowerCase().includes('free') || currentUser.package?.toLowerCase().includes('only registration') || currentUser.paymentAmount === 0);
   const userPkg = getPackageForUser(currentUser);
-  const pkgName = userPkg.name;
-  const pkgPrice = `₹${userPkg.price.toLocaleString('en-IN')}`;
-  const cappingAmount = `₹${userPkg.capping.toLocaleString('en-IN')}`;
-  const pkgCapping = `${cappingAmount} / Day`;
+  const pkgName = isOnlyReg ? 'ONLY Registration' : userPkg.name;
+  const pkgPrice = isOnlyReg ? '₹0' : (currentUser.paymentAmount ? `₹${currentUser.paymentAmount.toLocaleString('en-IN')}` : `₹${userPkg.price.toLocaleString('en-IN')}`);
+  const cappingAmount = isOnlyReg ? '₹0' : `₹${userPkg.capping.toLocaleString('en-IN')}`;
+  const pkgCapping = isOnlyReg ? '₹0 / Day (Activation Required)' : `${cappingAmount} / Day`;
   const joinedDateStr = currentUser.joined ? formatDateTime(currentUser.joined) : 'N/A';
 
   const purchaseHistory = [
     {
       id: `TXN-${currentUser.id}`,
-      name: `${pkgName} Package`,
-      price: currentUser.paymentAmount ? `₹${currentUser.paymentAmount.toLocaleString('en-IN')}` : pkgPrice,
+      name: isOnlyReg ? 'ONLY Registration' : `${pkgName} Package`,
+      price: pkgPrice,
       purchaseDate: joinedDateStr,
       capping: pkgCapping,
       status: currentUser.status === 'Active' ? 'Active' : 'Inactive'

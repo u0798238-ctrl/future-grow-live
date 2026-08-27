@@ -242,11 +242,11 @@ export function LeaderboardPage() {
           <table className="w-full text-left text-sm text-white">
             <thead className="bg-[#071E2C] text-xs uppercase font-semibold text-[#8FA3AF] border-b border-[#28485A]/40">
               <tr>
-                <th className="px-6 py-4">Rank</th>
-                <th className="px-6 py-4">Leader / User</th>
-                <th className="px-6 py-4">Package</th>
-                <th className="px-6 py-4">Total Earned</th>
-                <th className="px-6 py-4 text-right">Standing</th>
+                <th className="px-6 py-4 whitespace-nowrap">Rank</th>
+                <th className="px-6 py-4 whitespace-nowrap">Leader / User</th>
+                <th className="px-6 py-4 whitespace-nowrap">Package</th>
+                <th className="px-6 py-4 whitespace-nowrap">Total Earned</th>
+                <th className="px-6 py-4 text-right whitespace-nowrap">Standing</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#28485A]/30">
@@ -259,6 +259,7 @@ export function LeaderboardPage() {
               ) : (
                 filteredList.map((item) => {
                   const isCurrent = item.userId === currentUser?.id;
+                  const isOnlyRegistration = item.isFreeId || item.package.toLowerCase().includes('only registration') || item.package.toLowerCase().includes('free');
 
                   return (
                     <tr 
@@ -270,7 +271,7 @@ export function LeaderboardPage() {
                       }`}
                     >
                       {/* Rank Column */}
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {item.rank === 1 ? (
                             <span className="w-8 h-8 rounded-xl bg-amber-400 text-gray-950 font-black text-sm flex items-center justify-center shadow-sm">
@@ -293,7 +294,7 @@ export function LeaderboardPage() {
                       </td>
 
                       {/* User Column */}
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2.5">
                           {item.avatar ? (
                             <img 
@@ -321,20 +322,20 @@ export function LeaderboardPage() {
                       </td>
 
                       {/* Package Column */}
-                      <td className="px-6 py-4 text-xs">
-                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
-                          item.isFreeId || item.package.toLowerCase().includes('only registration') || item.package.toLowerCase().includes('free')
-                            ? 'bg-purple-900/40 text-purple-300 border-purple-500/40'
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap border shadow-sm ${
+                          isOnlyRegistration
+                            ? 'bg-purple-950/70 text-purple-200 border-purple-400/50'
                             : item.package.toLowerCase().includes('premium')
                             ? 'bg-[#35B779]/15 text-[#35B779] border-[#35B779]/40'
                             : 'bg-[#6F9DB5]/15 text-[#6F9DB5] border-[#6F9DB5]/40'
                         }`}>
-                          {item.isFreeId || item.package.toLowerCase().includes('free') ? 'ONLY Registration' : item.package}
+                          {isOnlyRegistration ? 'ONLY Registration' : item.package}
                         </span>
                       </td>
 
                       {/* Total Earned Column */}
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-extrabold text-base text-[#35B779]">
                           ₹{item.totalIncome.toLocaleString('en-IN')}
                         </div>
@@ -344,7 +345,7 @@ export function LeaderboardPage() {
                       </td>
 
                       {/* Standing Status */}
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-right whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${
                           item.rank === 1
                             ? 'bg-amber-400/20 text-amber-300 border-amber-400/60 shadow-sm'

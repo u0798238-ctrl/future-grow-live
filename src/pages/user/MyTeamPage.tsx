@@ -111,14 +111,15 @@ export function MyTeamPage() {
             <tbody className="">
               {filteredTeam.length > 0 ? (
                 filteredTeam.map((member) => {
+                  const isOnlyReg = member.isFreeId || member.package?.toLowerCase().includes('free') || member.package?.toLowerCase().includes('only registration') || member.paymentAmount === 0;
                   const pkg = getPackageForUser(member);
                   const isBasic = member.package?.toLowerCase().includes('basic') || member.paymentAmount === 6699;
-                  const idAmount = member.paymentAmount || pkg.price || 6699;
-                  const selectedProd = member.selectedProduct || (isBasic ? 'Shuit lanth (Single Piece)' : 'Shuit lanth & paint');
+                  const idAmount = isOnlyReg ? 0 : (member.paymentAmount || pkg.price || 6699);
+                  const selectedProd = isOnlyReg ? 'ONLY Registration' : (member.selectedProduct || (isBasic ? 'Suit Length (Single Piece)' : 'Suit Length & Pant'));
                   
                   return (
                     <tr key={member.id} className="border-b border-[#28485A]/50 hover:bg-[#1B3343]/40 transition-all duration-200 border-l-4 border-l-transparent hover:border-l-[#6F9DB5]">
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-full bg-[#1B3343] border border-[#28485A] flex items-center justify-center text-white">
                             <User className="w-4 h-4 text-blue-300" />
@@ -129,32 +130,38 @@ export function MyTeamPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-4 whitespace-nowrap">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${member.position === 'Left' ? 'bg-purple-900/40 text-purple-300 border border-purple-700/50' : 'bg-orange-900/40 text-orange-300 border border-orange-700/50'}`}>
                           {member.position}
                         </span>
                       </td>
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-1.5 text-xs text-gray-200">
                           <Calendar className="w-3.5 h-3.5 text-gray-400" />
                           <span>{formatDateTime(member.joined)}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-4">
-                        <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#071E2C] border border-[#28485A]/60 font-bold text-sm text-[#35B779]">
+                      <td className="px-5 py-4 whitespace-nowrap">
+                        <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border font-bold text-sm ${
+                          isOnlyReg 
+                            ? 'bg-purple-950/50 text-purple-200 border-purple-400/40' 
+                            : 'bg-[#071E2C] text-[#35B779] border-[#28485A]/60'
+                        }`}>
                           <IndianRupee className="w-3.5 h-3.5" />
                           <span>{idAmount.toLocaleString('en-IN')}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-4 whitespace-nowrap">
                         <div className="space-y-1">
                           <div className="flex items-center gap-1.5">
-                            <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                              isBasic 
+                            <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap border shadow-sm ${
+                              isOnlyReg 
+                                ? 'bg-purple-950/70 text-purple-200 border-purple-400/50' 
+                                : isBasic 
                                 ? 'bg-[#6F9DB5]/20 text-[#6F9DB5] border border-[#6F9DB5]/40' 
                                 : 'bg-[#35B779]/20 text-[#35B779] border border-[#35B779]/40'
                             }`}>
-                              {pkg.name || (isBasic ? 'Basic' : 'Premium')}
+                              {isOnlyReg ? 'ONLY Registration' : (pkg.name || (isBasic ? 'Basic' : 'Premium'))}
                             </span>
                           </div>
                           <div className="text-xs text-gray-300 flex items-center gap-1">
@@ -163,7 +170,7 @@ export function MyTeamPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-4 whitespace-nowrap">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
                           member.status === 'Active' 
                             ? 'bg-emerald-900/30 text-[#35B779] border-emerald-800/50' 
