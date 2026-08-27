@@ -746,7 +746,7 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
                   id: `D-${u.id}-${direct.id}`,
                   type: 'Direct',
                   amount: commission,
-                  description: 'Direct Referral Income',
+                  description: `Direct Referral from ${direct.name} (${direct.id})`,
                   date: new Date(directTs).toISOString()
                });
             }
@@ -792,7 +792,7 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
                    id: `M-${u.id}-${i + 1}`,
                    type: 'Matching',
                    amount: pairAmount,
-                   description: 'Matching Income',
+                   description: `Matching Pair (${leftMem.name} & ${rightMem.name})`,
                    date: new Date(pairCompletedTs).toISOString()
                 });
             } else {
@@ -826,7 +826,7 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
                        id: `L-${u.id}-${lvl.level}`,
                        type: 'Level',
                        amount: Number(lvl.income),
-                       description: getLevelOrdinalName(lvl.level),
+                       description: `${getLevelOrdinalName(lvl.level)} Completion`,
                        date: new Date(milestoneTs).toISOString()
                     });
                 }

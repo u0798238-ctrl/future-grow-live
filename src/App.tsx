@@ -42,6 +42,7 @@ import { AdminDashboardPage } from './pages/admin/DashboardPage';
 import { UsersPage } from './pages/admin/UsersPage';
 import { DepositsPage } from './pages/admin/DepositsPage';
 import { WithdrawalsPage } from './pages/admin/WithdrawalsPage';
+import { IncomeDistributionPage } from './pages/admin/IncomeDistributionPage';
 import { SettingsPage } from './pages/admin/SettingsPage';
 import { InquiriesPage } from './pages/admin/InquiriesPage';
 import { PackagesPage } from './pages/admin/PackagesPage';
@@ -98,6 +99,7 @@ export default function App() {
           <Route path="tree" element={<BinaryTreePage />} />
           <Route path="packages" element={<PackagesPage />} />
           <Route path="levels" element={<LevelIncomePage />} />
+          <Route path="income-distribution" element={<IncomeDistributionPage />} />
           <Route path="deposits" element={<DepositsPage />} />
           <Route path="withdrawals" element={<WithdrawalsPage />} />
           <Route path="settings" element={<SettingsPage />} />

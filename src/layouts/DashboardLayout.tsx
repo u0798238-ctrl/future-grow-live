@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
-import { Network, Menu, LogOut, LayoutDashboard, Users, Wallet, FileText, Settings, MessageSquare, Headset, User as UserIcon, GitMerge, ChevronDown, ArrowDownToLine, ArrowUpFromLine, ShieldCheck, Package as PackageIcon, Trophy, UserPlus, Shield, Download, Gift, Medal, Lock, KeyRound, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Network, Menu, LogOut, LayoutDashboard, Users, Wallet, FileText, Settings, MessageSquare, Headset, User as UserIcon, GitMerge, ChevronDown, ArrowDownToLine, ArrowUpFromLine, ShieldCheck, Package as PackageIcon, Trophy, UserPlus, Shield, Download, Gift, Medal, Lock, KeyRound, Eye, EyeOff, AlertCircle , IndianRupee } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getCurrentUser, getMlmUsers, setCurrentUserId, getCurrentUserId, MlmUser, getPackageForUser, getSystemSettings } from '@/lib/mlmStore';
 import { 
@@ -197,6 +197,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
     { name: 'Binary Tree', path: '/admin/tree', icon: GitMerge },
     { name: 'Packages', path: '/admin/packages', icon: PackageIcon },
     { name: 'Level Income', path: '/admin/levels', icon: Trophy },
+    { name: 'Income Distribution', path: '/admin/income-distribution', icon: IndianRupee },
     { name: 'Deposits', path: '/admin/deposits', icon: Wallet },
     { name: 'Withdrawals', path: '/admin/withdrawals', icon: Wallet },
     { name: 'Level Settings', path: '/admin/settings', icon: Settings },
