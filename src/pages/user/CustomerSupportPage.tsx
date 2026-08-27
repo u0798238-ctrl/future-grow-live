@@ -79,9 +79,44 @@ export function CustomerSupportPage() {
         </div>
       </div>
       
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* Help Desk Direct Contact Box */}
+        <div className="bg-[#132C3C] rounded-2xl p-5 border border-[#28485A]/50 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 border border-emerald-500/30">
+              <Phone className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Help Desk Support</h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/40">
+                  WhatsApp Only
+                </span>
+              </div>
+              <p className="text-base font-bold text-emerald-400 font-mono mt-0.5">+91 6393018079</p>
+              <p className="text-xs text-amber-300 font-medium mt-0.5">
+                💬 Please send WhatsApp message only (No voice calls)
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Available: Monday – Saturday (10:00 AM – 6:00 PM IST)
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+            <a
+              href="https://wa.me/916393018079?text=Hello%20Future%20Grow%20Support%2C%20I%20need%20help%20with%20my%20account."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+            >
+              <MessageSquare className="w-4 h-4" />
+              Chat on WhatsApp
+            </a>
+          </div>
+        </div>
           
-          {/* Right Column: Contact Inquiry Form */}
+        {/* Right Column: Contact Inquiry Form */}
           <div>
             <div className="bg-[#132C3C] rounded-2xl p-6 sm:p-8 border border-[#28485A]/40 shadow-xl">
               <div className="flex items-center justify-between mb-6 border-b border-[#28485A]/40 pb-4">

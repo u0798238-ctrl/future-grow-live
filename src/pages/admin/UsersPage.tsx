@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit, UserX, UserCheck, Shield, LogIn, IndianRupee, Key, RefreshCw, Trash2, X, Eye, MapPin, Package, Phone, Mail, Calendar, CreditCard, CheckCircle, ExternalLink, Sliders, Award, DollarSign, ToggleLeft, ToggleRight, Check, GitCommit, ArrowDown, UserPlus, Sparkles, AlertCircle, AlertTriangle, PlusCircle, MinusCircle, Equal, Zap, Smartphone, Unlock, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getMlmUsers, addMlmUser, deleteMlmUser, updateMlmUserStatus, updateMlmUser, setCurrentUserId, MlmUser, updateUserCommissionSettings, addCustomCommissionBonus, adjustUserFunds, activateUserAccount, rejectUserAccount, getPackageForUser, getTreePlacementSlotInfo } from '@/lib/mlmStore';
+import { getMlmUsers, addMlmUser, deleteMlmUser, recoverMlmUser, recoverAllDeletedUsers, updateMlmUserStatus, updateMlmUser, setCurrentUserId, MlmUser, updateUserCommissionSettings, addCustomCommissionBonus, adjustUserFunds, activateUserAccount, rejectUserAccount, getPackageForUser, getTreePlacementSlotInfo } from '@/lib/mlmStore';
 import { createActiveUserSession, forceResetUserSession, getActiveUserSessions } from '@/lib/sessionManager';
 import { formatDateTime } from '@/lib/utils';
 
 export function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<'All' | 'Active' | 'Inactive' | 'Blocked' | 'Deleted'>('All');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 50;
   const [actionModal, setActionModal] = useState<{type: string, user: any} | null>(null);
@@ -25,6 +26,9 @@ export function UsersPage() {
   const [activatePackage, setActivatePackage] = useState<'Premium' | 'Basic'>('Premium');
   const [activateProduct, setActivateProduct] = useState('Suit Length & Pant (Navy Blue Colour)');
   const [activateUtr, setActivateUtr] = useState('');
+
+  // Delete User Confirmation & Reason state
+  const [deleteReason, setDeleteReason] = useState<string>('');
 
   const [users, setUsers] = useState<MlmUser[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -198,6 +202,9 @@ export function UsersPage() {
 
   const handleActionClick = (type: string, user: any) => {
     setActionModal({ type, user });
+    if (type === 'delete') {
+      setDeleteReason('');
+    }
     if (type === 'funds') {
       setFundAction('deduct');
       setFundAmountStr('');
@@ -373,10 +380,22 @@ export function UsersPage() {
 
     try {
       switch (actionModal.type) {
-        case 'delete':
-          deleteMlmUser(actionModal.user.id);
+        case 'delete': {
+          const trimmedReason = deleteReason.trim();
+          if (!trimmedReason) {
+            showToast('⚠️ कृपया ID डिलीट करने का कारण (Reason: FRAUD / SCAMMER / CHEATER आदि) दर्ज करें या चुनें।', 'error');
+            return;
+          }
+          deleteMlmUser(actionModal.user.id, trimmedReason);
           loadUsers();
-          showToast(`✅ User ID ${actionModal.user.id} (${actionModal.user.name}) and all related data completely deleted from system & database.`, 'success');
+          showToast(`✅ User ID ${actionModal.user.id} (${actionModal.user.name}) deleted [Reason: ${trimmedReason}] & moved to recycle bin.`, 'success');
+          setDeleteReason('');
+          break;
+        }
+        case 'recover':
+          recoverMlmUser(actionModal.user.id);
+          loadUsers();
+          showToast(`✅ User ID ${actionModal.user.id} (${actionModal.user.name}) recovered successfully.`, 'success');
           break;
       case 'block':
         updateMlmUserStatus(actionModal.user.id, 'Blocked');
@@ -451,15 +470,19 @@ export function UsersPage() {
     setActionModal(null);
   };
 
-  const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     user.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.mobile.includes(searchTerm) ||
     (user.city && user.city.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (user.sponsorId && user.sponsorId.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+    (user.sponsorId && user.sponsorId.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesTab = activeTab === 'All' ? user.status !== 'Deleted' : user.status === activeTab;
+    
+    return matchesSearch && matchesTab;
+  });
 
   const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -513,12 +536,114 @@ export function UsersPage() {
         </div>
       )}
 
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-white">Registered Users & Member Details</h2>
+          <h2 className="text-2xl font-semibold text-white flex items-center gap-2.5">
+            <span>Registered Users & Member Details</span>
+            {users.filter(u => u.status === 'Deleted').length > 0 && (
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 font-mono">
+                {users.filter(u => u.status === 'Deleted').length} Deleted in Bin
+              </span>
+            )}
+          </h2>
           <p className="text-sm text-gray-300">Complete list of members with addresses, products, phone numbers & KYC</p>
         </div>
+
+        {/* Quick Recycle Bin Shortcut */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setActiveTab('Deleted'); setCurrentPage(1); }}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
+              activeTab === 'Deleted'
+                ? 'bg-red-600 text-white border-red-400 shadow-lg shadow-red-950/60'
+                : 'bg-[#1B3343] text-red-300 hover:text-white hover:bg-red-950/60 border-red-500/30'
+            }`}
+          >
+            <Trash2 className="w-3.5 h-3.5 text-red-400" />
+            <span>Recycle Bin (Deleted IDs)</span>
+            <span className="px-1.5 py-0.2 rounded bg-red-950/80 text-red-300 font-mono text-[11px] font-bold border border-red-500/40">
+              {users.filter(u => u.status === 'Deleted').length}
+            </span>
+          </button>
+        </div>
       </div>
+
+      {/* Tabs Filter Bar */}
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        {[
+          { key: 'All', label: 'All Users', count: users.filter(u => u.status !== 'Deleted').length, color: 'emerald' },
+          { key: 'Active', label: 'Active IDs', count: users.filter(u => u.status === 'Active').length, color: 'emerald' },
+          { key: 'Inactive', label: 'Inactive / Pending', count: users.filter(u => u.status === 'Inactive').length, color: 'amber' },
+          { key: 'Blocked', label: 'Blocked IDs', count: users.filter(u => u.status === 'Blocked').length, color: 'orange' },
+          { key: 'Deleted', label: '🗑️ Deleted (Recycle Bin)', count: users.filter(u => u.status === 'Deleted').length, color: 'red' },
+        ].map((tab) => {
+          const isSelected = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => { setActiveTab(tab.key as any); setCurrentPage(1); }}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 whitespace-nowrap flex items-center gap-2 border ${
+                isSelected
+                  ? tab.key === 'Deleted'
+                    ? 'bg-red-600 text-white border-red-400 shadow-lg shadow-red-950/50'
+                    : 'bg-[#28485A] text-white border-[#6F9DB5]/60 shadow-md'
+                  : 'bg-[#132C3C] text-gray-300 hover:text-white hover:bg-[#1B3343] border-[#28485A]/40'
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span className={`px-2 py-0.5 rounded-full text-[11px] font-mono font-bold ${
+                isSelected 
+                  ? 'bg-black/30 text-white' 
+                  : tab.key === 'Deleted' && tab.count > 0
+                  ? 'bg-red-500/20 text-red-300 border border-red-500/40'
+                  : 'bg-[#071E2C] text-gray-400'
+              }`}>
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Recycle Bin Active Helper Info Banner */}
+      {activeTab === 'Deleted' && (
+        <div className="p-4 bg-gradient-to-r from-red-950/60 to-amber-950/40 border-2 border-red-500/40 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg animate-in fade-in duration-300">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-red-900/40 rounded-xl border border-red-500/50 shrink-0">
+              <RefreshCw className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <span>Deleted IDs Recovery Center (रीसायकल बिन)</span>
+                <span className="text-[11px] font-normal px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  1-Click Restore Available
+                </span>
+              </h4>
+              <p className="text-xs text-gray-300 mt-0.5">
+                अगर किसी यूजर की ID गलती से डिलीट हो गई है, तो नीचे दिए गए <strong>"Recover ID"</strong> बटन पर क्लिक करें। ID तुरंत सारे डेटा के साथ वापस चालू हो जाएगी।
+              </p>
+            </div>
+          </div>
+          {users.filter(u => u.status === 'Deleted').length > 0 && (
+            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+              <span className="text-xs font-mono font-bold text-red-300 bg-red-950/90 border border-red-500/40 px-3 py-2 rounded-xl whitespace-nowrap">
+                {users.filter(u => u.status === 'Deleted').length} ID(s) in Bin
+              </span>
+              <button
+                onClick={() => {
+                  const restoredCount = recoverAllDeletedUsers();
+                  loadData();
+                  showToast(`✅ Successfully recovered ${restoredCount} deleted user account(s)!`, 'success');
+                }}
+                className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/60 transition-all border border-emerald-400/40"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>⚡ Recover All Deleted IDs (सभी रिकवर करें)</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="bg-[#132C3C] rounded-2xl border-2 border-[#6F9DB5]/40 shadow-[0_0_15px_rgba(111,157,181,0.15)] hover:border-[#6F9DB5] hover:shadow-[0_0_20px_rgba(111,157,181,0.3)] transition-all duration-300 overflow-hidden">
         <div className="p-4 border-b border-[#28485A]/30 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
@@ -627,7 +752,7 @@ export function UsersPage() {
                     </td>
                     <td className="px-5 py-4">
                       {(() => {
-                        if (user.isFreeId) {
+                        if (user.isFreeId || user.package === 'ONLY Registration' || user.package === 'Free (Zero Commission)' || user.package === 'Free (Admin Zero Commission)') {
                           return (
                             <div>
                               <div className="font-medium text-white text-xs flex items-center gap-1.5">
@@ -746,15 +871,34 @@ export function UsersPage() {
                             <Sparkles className="w-3 h-3 text-amber-300" /> Free ID (0 Commission)
                           </span>
                         ) : (
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-max ${
-                            user.status === 'Active' ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 font-bold' : 
-                            user.status === 'Blocked' ? 'bg-red-950/90 text-red-300 border border-red-500/50 font-bold' : 'bg-amber-900/30 text-amber-300 border border-amber-500/30'
-                          }`}>
-                            {user.status === 'Active' && <CheckCircle className="w-3 h-3 text-emerald-400" />}
-                            {user.status === 'Blocked' ? 'Blocked' : user.status === 'Active' ? 'Active' : (user.paymentStatus === 'Rejected' ? 'Rejected' : 'Pending')}
-                          </span>
+                          <div className="flex flex-col gap-1 items-start">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-max ${
+                              user.status === 'Deleted' ? 'bg-red-950/90 text-red-300 border border-red-500/80 font-bold' :
+                              user.status === 'Active' ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 font-bold' : 
+                              user.status === 'Blocked' ? 'bg-orange-950/90 text-orange-300 border border-orange-500/50 font-bold' : 'bg-amber-900/30 text-amber-300 border border-amber-500/30'
+                            }`}>
+                              {user.status === 'Active' && <CheckCircle className="w-3 h-3 text-emerald-400" />}
+                              {user.status === 'Deleted' ? (
+                                <>
+                                  <Trash2 className="w-3 h-3 text-red-400" />
+                                  <span>Deleted (In Bin)</span>
+                                </>
+                              ) : user.status === 'Blocked' ? (
+                                'Blocked'
+                              ) : user.status === 'Active' ? (
+                                'Active'
+                              ) : (
+                                user.paymentStatus === 'Rejected' ? 'Rejected' : 'Pending'
+                              )}
+                            </span>
+                            {user.status === 'Deleted' && user.deleteReason && (
+                              <span className="text-[10px] bg-red-900/60 text-red-200 px-2 py-0.5 rounded border border-red-500/40 font-semibold max-w-[160px] truncate" title={`Deletion Reason: ${user.deleteReason}`}>
+                                🚨 {user.deleteReason}
+                              </span>
+                            )}
+                          </div>
                         )}
-                        {(user.isFreeId || user.status !== 'Active') && (
+                        {user.status !== 'Deleted' && (user.isFreeId || user.status !== 'Active') && (
                           <div className="flex items-center gap-1 mt-0.5">
                             <button 
                               onClick={() => openActivateModal(user)}
@@ -849,11 +993,22 @@ export function UsersPage() {
                             <Lock className="w-4 h-4" />
                           </button>
                         )}
-                        <button 
-                          onClick={() => handleActionClick('delete', user)}
-                          className="p-1.5 bg-[#071E2C] rounded-md text-red-500 hover:text-red-400 transition-colors" title="Delete User ID">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {user.status === 'Deleted' ? (
+                          <button 
+                            onClick={() => handleActionClick('recover', user)}
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-md shadow-emerald-950/60 transition-all border border-emerald-400/40" 
+                            title="Click to Recover Deleted User ID"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            <span>Recover ID</span>
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => handleActionClick('delete', user)}
+                            className="p-1.5 bg-[#071E2C] rounded-md text-red-500 hover:text-red-400 transition-colors" title="Move to Recycle Bin">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -919,6 +1074,28 @@ export function UsersPage() {
                 <p className="text-xs text-gray-300 font-mono">User ID: {viewUserModal.id} • Joined: {viewUserModal.joined ? formatDateTime(viewUserModal.joined) : 'N/A'}</p>
               </div>
             </div>
+
+            {viewUserModal.status === 'Deleted' && (
+              <div className="mb-5 p-3.5 bg-red-950/60 border border-red-500/60 rounded-xl text-xs space-y-1.5 shadow-md shadow-red-950/50">
+                <div className="flex items-center gap-2 text-red-300 font-bold text-sm">
+                  <Trash2 className="w-4 h-4 text-red-400" />
+                  <span>Account Status: Deleted (In Recycle Bin / हटाया गया)</span>
+                </div>
+                {viewUserModal.deleteReason && (
+                  <p className="text-gray-200 flex items-center gap-2">
+                    <strong>Deletion Reason:</strong> 
+                    <span className="text-red-200 font-bold bg-red-900/80 px-2.5 py-0.5 rounded border border-red-500/40">
+                      🚨 {viewUserModal.deleteReason}
+                    </span>
+                  </p>
+                )}
+                {viewUserModal.deletedAt && (
+                  <p className="text-gray-400 text-[11px]">
+                    Deleted Timestamp: {formatDateTime(viewUserModal.deletedAt)}
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="space-y-5 text-sm">
               {/* Personal Info Grid */}
@@ -1119,7 +1296,8 @@ export function UsersPage() {
               {actionModal.type === 'reset' && `Reset Account: ${actionModal.user.id}`}
               {actionModal.type === 'block' && `Block User: ${actionModal.user.name}`}
               {actionModal.type === 'unblock' && `Unblock User: ${actionModal.user.name}`}
-              {actionModal.type === 'delete' && `Delete User: ${actionModal.user.id}`}
+              {actionModal.type === 'delete' && `Move to Recycle Bin: ${actionModal.user.id}`}
+              {actionModal.type === 'recover' && `Confirm ID Recovery: ${actionModal.user.id}`}
             </h3>
             
             <div className="space-y-4">
@@ -1423,18 +1601,63 @@ export function UsersPage() {
                 </div>
               )}
               
+              {actionModal.type === 'recover' && ( 
+                <div className="space-y-4">
+                  <div className="p-4 bg-emerald-950/50 border-2 border-emerald-500/50 rounded-2xl space-y-3 shadow-lg">
+                    <div className="flex items-center gap-2 text-emerald-300 font-bold text-base">
+                      <RefreshCw className="w-5 h-5 shrink-0 text-emerald-400" />
+                      <span>Confirm Single User ID Recovery (आईडी रीकवर करें)</span>
+                    </div>
+
+                    <div className="bg-[#071E2C] p-3.5 rounded-xl border border-emerald-500/30 text-xs space-y-1.5">
+                      <div className="flex justify-between text-gray-300">
+                        <span>Selected User ID:</span>
+                        <span className="font-mono font-bold text-emerald-400 text-sm">{actionModal.user.id}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-300">
+                        <span>Member Name:</span>
+                        <span className="font-semibold text-white">{actionModal.user.name}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-300">
+                        <span>Mobile Number:</span>
+                        <span className="font-mono text-gray-200">{actionModal.user.mobile}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-300">
+                        <span>Current Status:</span>
+                        <span className="font-semibold text-red-400 bg-red-950/60 px-2 py-0.5 rounded border border-red-500/30 text-[10px]">
+                          Deleted (In Recycle Bin)
+                        </span>
+                      </div>
+                      {actionModal.user.deleteReason && (
+                        <div className="flex justify-between text-gray-300">
+                          <span>Deletion Reason:</span>
+                          <span className="font-semibold text-red-300 bg-red-900/60 px-2 py-0.5 rounded border border-red-500/40 text-xs">
+                            🚨 {actionModal.user.deleteReason}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="text-xs text-emerald-200 leading-relaxed font-medium bg-emerald-900/30 p-2.5 rounded-lg border border-emerald-500/20">
+                      🔒 <strong>सुरक्षा सूचना:</strong> केवल यही चुनी गई ID (<strong>{actionModal.user.id}</strong>) रिकवर होकर दोबारा Active होगी। Recycle Bin की बाकी IDs यथावत रहेंगी (Only this single ID will be restored).
+                    </p>
+                  </div>
+                </div>
+              )}
+              
               {actionModal.type === 'delete' && ( 
                 <div className="space-y-4">
-                  <div className="p-4 bg-red-950/50 border-2 border-red-500/50 rounded-2xl space-y-3 shadow-lg">
+                  {/* Step 1: User Details & Recycle Bin Warning */}
+                  <div className="p-4 bg-red-950/40 border-2 border-red-500/50 rounded-2xl space-y-3 shadow-lg">
                     <div className="flex items-center gap-2 text-red-300 font-bold text-base">
                       <AlertTriangle className="w-5 h-5 shrink-0 text-red-400" />
-                      <span>Permanent User Deletion Warning</span>
+                      <span>Step 1: ID Deletion Confirmation (आईडी हटाने की पुष्टि)</span>
                     </div>
                     
                     <div className="bg-[#071E2C] p-3.5 rounded-xl border border-red-500/30 text-xs space-y-1.5">
                       <div className="flex justify-between text-gray-300">
-                        <span>User ID:</span>
-                        <span className="font-mono font-bold text-red-400">{actionModal.user.id}</span>
+                        <span>Selected User ID:</span>
+                        <span className="font-mono font-bold text-red-400 text-sm">{actionModal.user.id}</span>
                       </div>
                       <div className="flex justify-between text-gray-300">
                         <span>Member Name:</span>
@@ -1448,11 +1671,90 @@ export function UsersPage() {
                         <span>Wallet Balance:</span>
                         <span className="font-mono font-bold text-emerald-400">₹{actionModal.user.availableBalance?.toLocaleString('en-IN') || 0}</span>
                       </div>
+                      <div className="flex justify-between text-gray-300">
+                        <span>Package / Plan:</span>
+                        <span className="font-medium text-cyan-300">{actionModal.user.package || 'Premium'}</span>
+                      </div>
                     </div>
 
-                    <p className="text-xs text-red-200 leading-relaxed">
-                      ⚠️ <strong>Note:</strong> केवल यही चुनी गई ID (<strong>{actionModal.user.id}</strong>) स्थायी रूप से हटाई जाएगी। बाकी सभी टीम मेंबर्स सुरक्षित रहेंगे। (Only this single user ID will be deleted. All other members remain safe).
+                    <p className="text-xs text-red-200 leading-relaxed font-medium bg-red-900/30 p-2.5 rounded-lg border border-red-500/20">
+                      ⚠️ <strong>सूचना:</strong> यह ID Recycle Bin में सुरक्षित रखी जाएगी ताकि आवश्यकता पड़ने पर बाद में Recover की जा सके।
                     </p>
+                  </div>
+
+                  {/* Step 2: Mandatory Reason for Deletion */}
+                  <div className="p-4 bg-[#071E2C] border-2 border-amber-500/50 rounded-2xl space-y-3 shadow-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
+                        <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />
+                        <span>Step 2: Reason For Deletion (कारण दर्ज करें - अनिवार्य)</span>
+                      </div>
+                      <span className="text-[10px] bg-red-900/60 text-red-300 border border-red-500/40 px-2 py-0.5 rounded-full font-bold uppercase">
+                        Mandatory
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-gray-300">
+                      आप इस ID को क्यों डिलीट करना चाहते हैं? कृपया एक शब्द (जैसे <strong>FRAUD, SCAMMER, CHEATER</strong> आदि) दर्ज करें या नीचे दिए गए बटनों पर क्लिक करें:
+                    </p>
+
+                    {/* Quick Selection Tags */}
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] text-gray-400 font-medium">Quick 1-Click Reason Tags (क्लिक करके चुनें):</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          { tag: 'FRAUD', label: '🚨 FRAUD (फ्रॉड)', color: 'border-red-500/50 hover:bg-red-900/50 text-red-200' },
+                          { tag: 'SCAMMER', label: '⚠️ SCAMMER (स्कैमर)', color: 'border-orange-500/50 hover:bg-orange-900/50 text-orange-200' },
+                          { tag: 'CHEATER', label: '🚫 CHEATER (चीटर)', color: 'border-amber-500/50 hover:bg-amber-900/50 text-amber-200' },
+                          { tag: 'DUPLICATE ID', label: '📑 DUPLICATE (डुप्लीकेट ID)', color: 'border-cyan-500/50 hover:bg-cyan-900/50 text-cyan-200' },
+                          { tag: 'FAKE PAYMENT', label: '💳 FAKE PAYMENT (फर्जी UTR)', color: 'border-pink-500/50 hover:bg-pink-900/50 text-pink-200' },
+                          { tag: 'POLICY VIOLATION', label: '⚖️ VIOLATION (नियम उल्लंघन)', color: 'border-purple-500/50 hover:bg-purple-900/50 text-purple-200' },
+                          { tag: 'INACTIVE USER', label: '💤 INACTIVE (निष्क्रिय आईडी)', color: 'border-blue-500/50 hover:bg-blue-900/50 text-blue-200' },
+                          { tag: 'WRONG REGISTRATION', label: '❌ WRONG REG (गलत एंट्री)', color: 'border-gray-500/50 hover:bg-gray-800 text-gray-200' },
+                        ].map((item) => (
+                          <button
+                            key={item.tag}
+                            type="button"
+                            onClick={() => setDeleteReason(item.tag)}
+                            className={`text-xs px-2.5 py-1 rounded-lg border font-semibold transition-all ${
+                              deleteReason.toUpperCase() === item.tag
+                                ? 'bg-amber-500 text-black border-amber-400 font-bold shadow-md shadow-amber-950/60 scale-105'
+                                : `bg-[#0D2636] ${item.color}`
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Manual Reason Input */}
+                    <div className="space-y-1 pt-1">
+                      <label className="text-xs text-gray-300 font-semibold block">
+                        Or Type Custom Reason (या अपना कारण यहां टाइप करें):
+                      </label>
+                      <input
+                        type="text"
+                        value={deleteReason}
+                        onChange={(e) => setDeleteReason(e.target.value)}
+                        placeholder="e.g. FRAUD / SCAMMER / CHEATER / FAKE UTR..."
+                        className="w-full bg-[#0D2636] border-2 border-[#28485A] focus:border-amber-400 rounded-xl px-3.5 py-2 text-white text-sm focus:outline-none transition-colors"
+                        autoFocus
+                      />
+                    </div>
+
+                    {/* Live Validation Alert */}
+                    {!deleteReason.trim() ? (
+                      <div className="text-xs text-amber-300 bg-amber-950/40 p-2.5 rounded-xl border border-amber-500/30 flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+                        <span>🔒 <strong>डिलीट बटन लॉक है:</strong> कृपया ऊपर से Reason चुनें या टाइप करें।</span>
+                      </div>
+                    ) : (
+                      <div className="text-xs text-emerald-300 bg-emerald-950/40 p-2.5 rounded-xl border border-emerald-500/30 flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 shrink-0 text-emerald-400" />
+                        <span>✅ <strong>Reason Ready:</strong> "{deleteReason.trim()}" (अब आप डिलीट कर सकते हैं)</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -1466,15 +1768,21 @@ export function UsersPage() {
                 </button>
                 <button 
                   onClick={handleConfirmAction} 
-                  className={`px-5 py-2.5 rounded-xl text-white text-sm font-bold transition-all shadow-md cursor-pointer flex items-center gap-1.5 ${
+                  disabled={actionModal.type === 'delete' && !deleteReason.trim()}
+                  className={`px-5 py-2.5 rounded-xl text-white text-sm font-bold transition-all shadow-md flex items-center gap-1.5 ${
                     actionModal.type === 'delete' 
-                      ? 'bg-red-600 hover:bg-red-500 shadow-red-950/80' 
+                      ? !deleteReason.trim()
+                        ? 'bg-gray-700 text-gray-400 opacity-60 cursor-not-allowed border border-gray-600'
+                        : 'bg-red-600 hover:bg-red-500 shadow-red-950/80 cursor-pointer'
+                      : actionModal.type === 'recover'
+                      ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/80 cursor-pointer'
                       : actionModal.type === 'reset'
-                      ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-950/80'
-                      : 'bg-emerald-600 hover:bg-emerald-500'
+                      ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-950/80 cursor-pointer'
+                      : 'bg-emerald-600 hover:bg-emerald-500 cursor-pointer'
                   }`}
                 >
-                  {actionModal.type === 'delete' && 'Yes, Permanently Delete ID (हटाएं)'}
+                  {actionModal.type === 'recover' && 'Confirm Recover This ID (हां, सिर्फ इस ID को वापस लाएं)'}
+                  {actionModal.type === 'delete' && (deleteReason.trim() ? `Confirm Delete ID [Reason: ${deleteReason.trim()}]` : 'Enter Reason to Delete (कारण दर्ज करें)')}
                   {actionModal.type === 'reset' && 'Yes, Reset All Incomes (रिसेट करें)'}
                   {actionModal.type === 'block' && 'Yes, Block Account'}
                   {actionModal.type === 'unblock' && 'Yes, Unblock Account'}

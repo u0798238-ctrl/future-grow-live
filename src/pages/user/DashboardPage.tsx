@@ -110,7 +110,7 @@ export function UserDashboardPage() {
               </span>
             </div>
             <p className="text-xs text-gray-300 mt-1">
-              ID: <span className="font-mono text-[#35B779] font-semibold">{userStats?.id}</span> • Package: <span className="text-white font-medium">{userStats?.package || 'Premium (₹8,599)'}</span>
+              ID: <span className="font-mono text-[#35B779] font-semibold">{userStats?.id}</span> • Package: <span className="text-white font-medium">{userStats?.isFreeId || userStats?.package?.toLowerCase().includes('free') ? 'ONLY Registration' : (userStats?.package || 'Premium (₹8,599)')}</span>
             </p>
           </div>
         </div>

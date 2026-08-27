@@ -178,7 +178,7 @@ export function WithdrawalPage() {
       setToastMessage({
         type: 'error',
         title: 'Withdrawal Locked',
-        text: 'Your account is currently registered as a Free ID (Zero Commission). Please activate your account with package payment to enable withdrawals.'
+        text: 'Your account is currently registered as ONLY Registration. Please activate your account with package payment to enable withdrawals.'
       });
       return;
     }
@@ -378,7 +378,7 @@ export function WithdrawalPage() {
         </div>
       )}
 
-      {/* Free ID Banner */}
+      {/* ONLY Registration Banner */}
       {isFreeOrInactive && (
         <div className="bg-purple-950/50 border border-purple-500/50 rounded-2xl p-5 shadow-lg">
           <div className="flex items-start gap-4">
@@ -387,10 +387,10 @@ export function WithdrawalPage() {
             </div>
             <div className="space-y-1 flex-1">
               <h3 className="text-base font-semibold text-purple-300">
-                🔒 Free ID Account: Withdrawal Locked (आईडी एक्टिवेशन आवश्यक है)
+                🔒 ONLY Registration Account: Withdrawal Locked (आईडी एक्टिवेशन आवश्यक है)
               </h3>
               <p className="text-xs text-purple-100 leading-relaxed">
-                Your account is currently registered as a <strong>Free / Inactive ID (Zero Commission)</strong>. All your earnings & wallet balances are displayed, but <strong>withdrawals will only be unlocked once your account is activated with package payment by Admin</strong>.
+                Your account is currently registered as <strong>ONLY Registration</strong>. All your earnings & wallet balances are displayed, but <strong>withdrawals will only be unlocked once your account is activated with package payment by Admin</strong>.
               </p>
               <p className="text-xs text-amber-300 mt-1">
                 ⚡ As soon as your ID is activated, you will be able to withdraw all your earnings directly to your UPI ID or Bank account.
@@ -739,7 +739,7 @@ export function WithdrawalPage() {
                 className="w-full h-auto min-h-[3.5rem] whitespace-normal px-4 py-3 text-sm sm:text-base leading-snug bg-gray-800 text-gray-300 border border-gray-700 cursor-not-allowed opacity-80 shadow-md"
               >
                 {isFreeOrInactive 
-                  ? '🔒 Free ID Account - Activation Required to Withdraw'
+                  ? '🔒 ONLY Registration Account - Activation Required to Withdraw'
                   : !isWithdrawalAllowedByAdmin 
                   ? '🔒 Withdrawals Paused by Admin'
                   : '🔒 Withdrawals Locked (PAN Required / Admin Approval Needed)'}
@@ -747,7 +747,7 @@ export function WithdrawalPage() {
               <div className="bg-red-950/30 border border-red-500/20 p-3 rounded-xl">
                 <p className="text-center text-xs text-red-400 font-medium leading-relaxed">
                   {isFreeOrInactive 
-                    ? 'Your account is currently registered as a Free ID. Please activate your account with package payment to enable withdrawals.'
+                    ? 'Your account is currently registered as ONLY Registration. Please activate your account with package payment to enable withdrawals.'
                     : !isWithdrawalAllowedByAdmin
                     ? 'Your withdrawal access is currently on hold. Please contact Admin.'
                     : 'If you do not have a PAN Card, withdrawal will only unlock once Admin enables the exemption setting for your account.'}

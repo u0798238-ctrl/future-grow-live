@@ -167,7 +167,7 @@ export function WalletPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-white">{tx.description}</p>
+                        <p className="text-sm font-semibold text-white">{tx.type === 'Direct' ? 'Direct Referral Income' : tx.type === 'Matching' ? 'Matching Income' : tx.type === 'Level' ? 'Level Income' : (tx.type === 'Withdrawal' ? 'Withdrawal' : tx.type === 'Deposit' ? 'Deposit' : tx.description)}</p>
                         {tx.type === 'Level' && (
                           <span className="text-[9px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 px-1.5 py-0.2 rounded uppercase tracking-wider">
                             Level Reward

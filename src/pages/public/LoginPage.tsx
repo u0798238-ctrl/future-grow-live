@@ -49,8 +49,8 @@ export function LoginPage() {
     });
 
     if (found) {
-      if (found.status === 'Blocked') {
-        setError('Your account has been blocked by the admin. Please contact support.');
+      if (found.status === 'Blocked' || found.status === 'Deleted') {
+        setError(found.status === 'Deleted' ? 'Account not found' : 'Your account has been blocked by the admin. Please contact support.');
         return;
       }
 

@@ -254,7 +254,7 @@ export function ProfilePage() {
               </CardDescription>
             </div>
             <div className="px-3 py-1 bg-[#1B3343] rounded-lg text-xs font-semibold text-emerald-300 border border-emerald-500/30">
-              {currentUser.package} Package
+              {currentUser.isFreeId || currentUser.package?.toLowerCase().includes('free') ? 'ONLY Registration' : `${currentUser.package} Package`}
             </div>
           </div>
         </CardHeader>

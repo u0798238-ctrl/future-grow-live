@@ -323,11 +323,13 @@ export function LeaderboardPage() {
                       {/* Package Column */}
                       <td className="px-6 py-4 text-xs">
                         <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
-                          item.package.toLowerCase().includes('premium')
+                          item.isFreeId || item.package.toLowerCase().includes('only registration') || item.package.toLowerCase().includes('free')
+                            ? 'bg-purple-900/40 text-purple-300 border-purple-500/40'
+                            : item.package.toLowerCase().includes('premium')
                             ? 'bg-[#35B779]/15 text-[#35B779] border-[#35B779]/40'
                             : 'bg-[#6F9DB5]/15 text-[#6F9DB5] border-[#6F9DB5]/40'
                         }`}>
-                          {item.package}
+                          {item.isFreeId || item.package.toLowerCase().includes('free') ? 'ONLY Registration' : item.package}
                         </span>
                       </td>
 

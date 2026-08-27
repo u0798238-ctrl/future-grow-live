@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
+
 import { Network, Menu, LogOut, LayoutDashboard, Users, Wallet, FileText, Settings, MessageSquare, Headset, User as UserIcon, GitMerge, ChevronDown, ArrowDownToLine, ArrowUpFromLine, ShieldCheck, Package as PackageIcon, Trophy, UserPlus, Shield, Download, Gift, Medal, Lock, KeyRound, Eye, EyeOff, AlertCircle , IndianRupee } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getCurrentUser, getMlmUsers, setCurrentUserId, getCurrentUserId, MlmUser, getPackageForUser, getSystemSettings } from '@/lib/mlmStore';
@@ -20,9 +21,12 @@ interface SidebarItem {
 
 export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
   const [currentUser, setCurrentUser] = useState<MlmUser | null>(getCurrentUser());
   const [allUsers, setAllUsers] = useState<MlmUser[]>(getMlmUsers());
   const location = useLocation();
+
+  
 
   React.useLayoutEffect(() => {
     const main = document.getElementById('dashboard-main');
@@ -323,7 +327,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
   }
 
   return (
-    <div className="h-screen w-full overflow-hidden bg-[#071E2C] flex font-sans text-white">
+    <div className="fixed inset-0 w-full overflow-hidden bg-[#071E2C] flex font-sans text-white">
       {/* PWA Floating Install Prompt */}
       <PwaInstallPrompt />
       <aside
@@ -485,17 +489,20 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
 
         {/* Scrollable Main Area */}
         <main id="dashboard-main" className="flex-1 overflow-y-auto bg-[#071E2C] p-4 sm:p-6 lg:p-8">
-          <Outlet />
+          <div className="w-full h-full">
+            <Outlet />
+          </div>
         </main>
       </div>
 
       {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="absolute inset-0 z-40 bg-[#071E2C]/80 backdrop-blur-sm lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      <div
+        className={cn(
+          "absolute inset-0 z-40 bg-[#071E2C]/80 backdrop-blur-sm lg:hidden transition-opacity duration-300",
+          isSidebarOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
+        )}
+        onClick={() => setIsSidebarOpen(false)}
+      />
     </div>
   );
 }

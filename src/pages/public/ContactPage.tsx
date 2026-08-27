@@ -116,20 +116,38 @@ export function ContactPage() {
                   <div className="w-9 h-9 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
                     <Phone className="w-4 h-4" />
                   </div>
-                  <div>
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Help Desk</h3>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <p className="text-sm font-medium text-white">+91 6393018079</p>
+                  <div className="w-full">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Help Desk</h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30">
+                        WhatsApp Only
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-sm font-semibold text-white font-mono">+91 6393018079</p>
                       <button 
                         onClick={() => handleCopy('+91 6393018079', 'phone')}
-                        className="text-gray-400 hover:text-emerald-400 transition-colors"
+                        className="text-gray-400 hover:text-emerald-400 transition-colors p-1"
                         title="Copy Phone Number"
                         type="button"
                       >
                         {copiedPhone ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                       </button>
+                      <a
+                        href="https://wa.me/916393018079?text=Hello%20Future%20Grow%20Support%2C%20I%20need%20assistance."
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition-all shadow-sm shrink-0 ml-auto"
+                      >
+                        Chat on WhatsApp
+                      </a>
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">Mon - Sat (10:00 AM - 6:00 PM)</p>
+                    <p className="text-xs text-amber-300/90 font-medium mt-1">
+                      💬 No Calls — WhatsApp Messages Only
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      Mon - Sat (10:00 AM - 6:00 PM)
+                    </p>
                   </div>
                 </div>
 

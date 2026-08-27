@@ -357,7 +357,7 @@ export interface MlmUser {
   mobile: string;
   package: string;
   isFreeId?: boolean; // Admin Free ID (Zero Commission to anyone)
-  status: 'Active' | 'Inactive' | 'Blocked';
+  status: 'Active' | 'Inactive' | 'Blocked' | 'Deleted';
   joined: string;
   sponsorId: string | null;
   parentId: string | null;
@@ -385,6 +385,8 @@ export interface MlmUser {
   adminAdjustments?: AdminFundAdjustment[];
   manualBalanceOverride?: number;
   kycDetails?: any;
+  deleteReason?: string;
+  deletedAt?: string;
 
   // Stats
   availableBalance: number;
@@ -680,8 +682,8 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
       const u = users.find(x => x.id === rootId);
       if (!u) return [];
       const list: MlmUser[] = [];
-      // Free IDs generate zero commissions for anyone in the tree
-      if (u.status === 'Active' && !u.isFreeId && !u.package?.toLowerCase().includes('free') && u.commissionSettings?.generatesMatching !== false && u.commissionSettings?.generatesLevel !== false) {
+      // Free IDs / ONLY Registration generate zero commissions for anyone in the tree
+      if (u.status === 'Active' && !u.isFreeId && !u.package?.toLowerCase().includes('free') && !u.package?.toLowerCase().includes('only registration') && u.commissionSettings?.generatesMatching !== false && u.commissionSettings?.generatesLevel !== false) {
          list.push(u);
       }
       list.push(...getActiveSubtreeMembers(u.leftId));
@@ -723,9 +725,9 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
       const userPkg = getPackageForUser(u);
 
       // 2. Direct Referral Joins & Income (Recorded at the exact moment of direct's join)
-      // Free IDs do not generate direct referral bonus for the sponsor
+      // Free IDs / ONLY Registration do not generate direct referral bonus for the sponsor
       const activeDirects = users
-         .filter(x => x.sponsorId === u.id && x.status === 'Active' && !x.isFreeId && !x.package?.toLowerCase().includes('free') && x.commissionSettings?.generatesDirect !== false)
+         .filter(x => x.sponsorId === u.id && x.status === 'Active' && !x.isFreeId && !x.package?.toLowerCase().includes('free') && !x.package?.toLowerCase().includes('only registration') && x.commissionSettings?.generatesDirect !== false)
          .sort((a, b) => {
             const idxA = users.findIndex(x => x.id === a.id);
             const idxB = users.findIndex(x => x.id === b.id);
@@ -1214,11 +1216,11 @@ export const addMlmUser = async (data: AddMlmUserPayload): Promise<MlmUser> => {
       type: 'Deposit',
       amount: isFree ? 0 : (data.paymentAmount || 6699),
       description: isFree 
-         ? 'Free ID Zero Commission Activation (No Payment)' 
+         ? 'ONLY Registration Activation (No Payment)' 
          : `Package Activation Deposit (${data.package || 'Premium'} - ${data.selectedProduct || 'Product'})`,
       date: nowIso,
       status: isFree || userStatus === 'Active' ? 'Approved' : 'Pending',
-      utr: isFree ? 'FREE-ID' : (data.utrNumber || 'MANUAL-ENTRY'),
+      utr: isFree ? 'ONLY-REGISTRATION' : (data.utrNumber || 'MANUAL-ENTRY'),
       screenshot: data.paymentProof
    };
 
@@ -1236,9 +1238,9 @@ export const addMlmUser = async (data: AddMlmUserPayload): Promise<MlmUser> => {
       state: data.state || '',
       pincode: data.pincode || '',
       panNumber: data.panNumber || '',
-      package: isFree ? 'Free (Zero Commission)' : (data.package || 'Premium'),
-      selectedProduct: isFree ? 'Free ID (Zero Commission)' : (data.selectedProduct || 'Suit Length & Pant (Green Colour)'),
-      utrNumber: isFree ? 'ADMIN-FREE-ID' : (data.utrNumber || ''),
+      package: isFree ? 'ONLY Registration' : (data.package || 'Premium'),
+      selectedProduct: isFree ? 'ONLY Registration' : (data.selectedProduct || 'Suit Length & Pant (Green Colour)'),
+      utrNumber: isFree ? 'ONLY-REGISTRATION' : (data.utrNumber || ''),
       paymentProof: data.paymentProof || '',
       paymentAmount: isFree ? 0 : (data.paymentAmount || 6699),
       paymentStatus: isFree || userStatus === 'Active' ? 'Approved' : 'Pending',
@@ -1391,122 +1393,26 @@ export const saveMlmUsers = (users: MlmUser[]) => {
    window.dispatchEvent(new StorageEvent('storage', { key: 'mlm_users' }));
 }
 
-export const deleteMlmUser = (userId: string) => {
+export const deleteMlmUser = (userId: string, reason?: string) => {
    let users = getMlmUsers();
    const user = users.find(u => u.id === userId);
    if (!user) return;
    
    // Protect Root Admin from accidental deletion
    if (userId === 'FGPL000001') {
-      throw new Error('Cannot delete Root Admin (FGPL000001).');
+      console.warn("Cannot delete root admin");
+      return;
    }
-   
-   // 1. Delete from Firebase Cloud Firestore
-   import('@/lib/firebase').then(m => {
-     m.deleteUserFromCloud(userId);
-     m.broadcastSystemUpdate(`User ${userId} deleted by admin`);
-   }).catch(console.error);
-
-   // 2. Delete from Supabase Database
-   import('@/lib/supabase').then(m => {
-     m.deleteUserFromSupabase(userId);
-   }).catch(console.error);
 
    // 3. Clear active session
    import('@/lib/sessionManager').then(m => {
      m.clearActiveUserSession(userId);
    }).catch(console.error);
    
-   // 4. Clean up tree structure and safely re-link downlines
-   const userLeftChildId = user.leftId || null;
-   const userRightChildId = user.rightId || null;
-   const parentUser = user.parentId ? users.find(u => u.id === user.parentId) : null;
-   const fallbackSponsor = user.sponsorId || 'FGPL000001';
-
-   users.forEach(u => {
-      // If u was parent of deleted user, re-link parent's branch to child
-      if (u.leftId === userId) {
-         u.leftId = userLeftChildId || userRightChildId || null;
-      }
-      if (u.rightId === userId) {
-         u.rightId = (u.leftId === userLeftChildId ? userRightChildId : userLeftChildId) || null;
-      }
-      
-      // If any downline member was sponsored by this deleted user, safely re-link sponsor
-      if (u.sponsorId === userId) {
-         u.sponsorId = fallbackSponsor;
-      }
-      
-      // If any member had this user as parent in tree, re-link to upper parent or fallback
-      if (u.parentId === userId) {
-         u.parentId = parentUser ? parentUser.id : 'FGPL000001';
-      }
-   });
-   
-   // 5. Remove the user from users array
-   users = users.filter(u => u.id !== userId);
-   
-   // 6. Clean up from pending members
-   try {
-      const rawPending = localStorage.getItem('pending_members');
-      if (rawPending) {
-         const pendingList = JSON.parse(rawPending);
-         if (Array.isArray(pendingList)) {
-            const updatedPending = pendingList.filter((m: any) => m.id !== userId && m.userId !== userId);
-            localStorage.setItem('pending_members', JSON.stringify(updatedPending));
-         }
-      }
-   } catch (e) {
-      console.error('Error cleaning pending members on delete:', e);
-   }
-
-   // 7. Clean up deposits for this user
-   try {
-      ['app_deposits', 'mlm_deposits', 'admin_deposits'].forEach(key => {
-         const raw = localStorage.getItem(key);
-         if (raw) {
-            const list = JSON.parse(raw);
-            if (Array.isArray(list)) {
-               const filtered = list.filter((tx: any) => tx.userId !== userId && tx.id !== userId);
-               localStorage.setItem(key, JSON.stringify(filtered));
-            }
-         }
-      });
-   } catch (e) {
-      console.error('Error cleaning deposits on delete:', e);
-   }
-
-   // 8. Clean up withdrawals for this user
-   try {
-      ['app_withdrawals', 'mlm_withdrawals'].forEach(key => {
-         const raw = localStorage.getItem(key);
-         if (raw) {
-            const list = JSON.parse(raw);
-            if (Array.isArray(list)) {
-               const filtered = list.filter((tx: any) => tx.userId !== userId && tx.id !== userId);
-               localStorage.setItem(key, JSON.stringify(filtered));
-            }
-         }
-      });
-   } catch (e) {
-      console.error('Error cleaning withdrawals on delete:', e);
-   }
-
-   // 9. Clean up level history & KYC data for this user
-   try {
-      const rawLvl = localStorage.getItem('app_level_history');
-      if (rawLvl) {
-         const list = JSON.parse(rawLvl);
-         if (Array.isArray(list)) {
-            const filtered = list.filter((tx: any) => tx.userId !== userId && tx.fromUserId !== userId && tx.toUserId !== userId);
-            localStorage.setItem('app_level_history', JSON.stringify(filtered));
-         }
-      }
-      localStorage.removeItem(`kyc_data_${userId}`);
-      localStorage.removeItem(`mlm_kyc_${userId}`);
-   } catch (e) {
-      console.error('Error cleaning level history/KYC on delete:', e);
-   }
+   // 4. Soft Delete instead of hard delete
+   user.status = 'Deleted';
+   user.deleteReason = reason?.trim() || 'Admin Action';
+   user.deletedAt = new Date().toISOString();
 
    // 10. Reset current session if deleted
    if (localStorage.getItem('current_user_id') === userId) {
@@ -1517,56 +1423,50 @@ export const deleteMlmUser = (userId: string) => {
    users = recalculateTreeStats(users);
    localStorage.setItem('mlm_users', JSON.stringify(users)); 
    
-   // Actually remove from cloud databases so it doesn't reappear
-   try {
-       deleteUserFromCloud(userId);
-       deleteUserFromSupabase(userId);
-   } catch (e) {
-       console.error('Cloud delete error:', e);
-   }
-
    pushMlmStateToSupabase('mlm_users', users);
    pushMlmStateToFirebase('mlm_users', users);
    
-   // 12. Dispatch live events
    window.dispatchEvent(new Event('mlm_update'));
    window.dispatchEvent(new Event('current_user_change'));
-   window.dispatchEvent(new StorageEvent('storage', { key: 'mlm_users' }));
-}
-
-export const updateUserCommissionSettings = (userId: string, settings: Partial<CommissionSettings>): MlmUser | null => {
-   let users = getMlmUsers();
-   const user = users.find(u => u.id === userId);
-   if (!user) return null;
-   
-   user.commissionSettings = {
-      ...(user.commissionSettings || { directEnabled: true, matchingEnabled: true, levelEnabled: true }),
-      ...settings
-   };
-   
-   users = recalculateTreeStats(users);
-   localStorage.setItem('mlm_users', JSON.stringify(users)); pushMlmStateToSupabase('mlm_users', users);
-   window.dispatchEvent(new Event('mlm_update'));
-   window.dispatchEvent(new Event('current_user_change'));
-   return users.find(u => u.id === userId) || user;
 };
 
-export const addCustomCommissionBonus = (userId: string, amount: number, note: string) => {
+export const recoverMlmUser = (userId: string) => {
    let users = getMlmUsers();
    const user = users.find(u => u.id === userId);
    if (!user) return;
    
-   const currentBonus = user.commissionSettings?.customBonus || 0;
-   user.commissionSettings = {
-      ...(user.commissionSettings || {}),
-      customBonus: currentBonus + amount,
-      customBonusNote: note || 'Special Commission / Incentive Bonus'
-   };
-   
-   users = recalculateTreeStats(users);
-   localStorage.setItem('mlm_users', JSON.stringify(users)); pushMlmStateToSupabase('mlm_users', users);
-   window.dispatchEvent(new Event('mlm_update'));
-   window.dispatchEvent(new Event('current_user_change'));
+   if (user.status === 'Deleted') {
+       // Restore to Active if they had payment or package, else Inactive
+       user.status = (user.paymentAmount && user.paymentAmount > 0) || user.package?.includes('₹') || user.kycStatus === 'Approved' ? 'Active' : 'Inactive';
+       users = recalculateTreeStats(users);
+       localStorage.setItem('mlm_users', JSON.stringify(users)); 
+       
+       pushMlmStateToSupabase('mlm_users', users);
+       pushMlmStateToFirebase('mlm_users', users);
+       
+       window.dispatchEvent(new Event('mlm_update'));
+       window.dispatchEvent(new Event('current_user_change'));
+   }
+};
+
+export const recoverAllDeletedUsers = (): number => {
+   let users = getMlmUsers();
+   let count = 0;
+   users.forEach(u => {
+     if (u.status === 'Deleted') {
+       u.status = (u.paymentAmount && u.paymentAmount > 0) || u.package?.includes('₹') || u.kycStatus === 'Approved' ? 'Active' : 'Inactive';
+       count++;
+     }
+   });
+   if (count > 0) {
+     users = recalculateTreeStats(users);
+     localStorage.setItem('mlm_users', JSON.stringify(users));
+     pushMlmStateToSupabase('mlm_users', users);
+     pushMlmStateToFirebase('mlm_users', users);
+     window.dispatchEvent(new Event('mlm_update'));
+     window.dispatchEvent(new Event('current_user_change'));
+   }
+   return count;
 };
 
 export const adjustUserFunds = (
@@ -1973,6 +1873,7 @@ export interface LeaderboardRank {
   userId: string;
   name: string;
   mobile?: string;
+  isFreeId?: boolean;
   package: string;
   totalIncome: number;
   directJoins: number;
@@ -2001,11 +1902,15 @@ export const getLeaderboardData = (): LeaderboardRank[] => {
     // Performance Score based on earnings & leadership
     const performanceScore = Math.round(totalInc + (directCount * 100) + (pairsCount * 50) + (team * 10));
 
+    const isFree = u.isFreeId || (u.package && u.package.toLowerCase().includes('free')) || u.paymentAmount === 0;
+    const pkgDisplay = isFree ? 'ONLY Registration' : (u.package || 'Premium (₹8,599)');
+
     return {
       userId: u.id,
       name: u.name,
       mobile: u.mobile,
-      package: u.package || 'Premium (₹8,599)',
+      isFreeId: isFree,
+      package: pkgDisplay,
       totalIncome: totalInc,
       matchingIncome: matchingInc,
       directIncome: directInc,
@@ -2125,4 +2030,38 @@ export const deleteAnnouncement = (id: string) => {
   let announcements = getAnnouncements();
   announcements = announcements.filter(a => a.id !== id);
   saveAnnouncements(announcements);
+};
+
+
+export const updateUserCommissionSettings = (userId: string, settings: any) => {
+   let users = getMlmUsers();
+   const user = users.find(u => u.id === userId);
+   if (user) {
+       user.commissionSettings = settings;
+       localStorage.setItem('mlm_users', JSON.stringify(users));
+       import('@/lib/supabase').then(m => m.pushMlmStateToSupabase('mlm_users', users)).catch(console.error);
+       window.dispatchEvent(new Event('mlm_update'));
+   }
+};
+
+export const addCustomCommissionBonus = (userId: string, amount: number, description: string) => {
+   let users = getMlmUsers();
+   const user = users.find(u => u.id === userId);
+   if (user) {
+       user.availableBalance += amount;
+       user.totalIncome += amount;
+       if (!user.transactions) user.transactions = [];
+       user.transactions.push({
+           id: 'TRX' + Date.now(),
+           amount,
+           date: new Date().toISOString(),
+           type: 'Deposit',
+           description,
+           fromUserId: 'Admin',
+           status: 'Completed'
+       });
+       localStorage.setItem('mlm_users', JSON.stringify(users));
+       import('@/lib/supabase').then(m => m.pushMlmStateToSupabase('mlm_users', users)).catch(console.error);
+       window.dispatchEvent(new Event('mlm_update'));
+   }
 };
