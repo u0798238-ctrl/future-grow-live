@@ -21,6 +21,7 @@ export function PublicLayout() {
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Business Plan', path: '/plan' },
+    { name: 'The People Support', path: '/the-people-support' },
     { name: 'Contact', path: '/contact' },
   ];
 
@@ -165,6 +166,7 @@ export function PublicLayout() {
               <ul className="space-y-2 text-sm">
                 <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
                 <li><Link to="/plan" className="hover:text-white transition-colors">Business Plan</Link></li>
+                <li><Link to="/the-people-support" className="hover:text-white transition-colors text-emerald-400 font-medium">🌱 The People Support</Link></li>
                 <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>

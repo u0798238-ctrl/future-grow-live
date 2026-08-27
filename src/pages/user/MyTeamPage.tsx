@@ -142,14 +142,16 @@ export function MyTeamPage() {
                         </div>
                       </td>
                       <td className="px-5 py-4 whitespace-nowrap">
-                        <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border font-bold text-sm ${
-                          isOnlyReg 
-                            ? 'bg-purple-950/50 text-purple-200 border-purple-400/40' 
-                            : 'bg-[#071E2C] text-[#35B779] border-[#28485A]/60'
-                        }`}>
-                          <IndianRupee className="w-3.5 h-3.5" />
-                          <span>{idAmount.toLocaleString('en-IN')}</span>
-                        </div>
+                        {isOnlyReg ? (
+                          <span className="inline-flex items-center justify-center px-3 py-1 rounded-lg bg-purple-950/70 border border-purple-400/60 font-black text-xs text-purple-200 tracking-wider shadow-sm">
+                            FLASH
+                          </span>
+                        ) : (
+                          <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#071E2C] text-[#35B779] border border-[#28485A]/60 font-bold text-sm">
+                            <IndianRupee className="w-3.5 h-3.5" />
+                            <span>{idAmount.toLocaleString('en-IN')}</span>
+                          </div>
+                        )}
                       </td>
                       <td className="px-5 py-4 whitespace-nowrap">
                         <div className="space-y-1">

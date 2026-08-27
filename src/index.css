@@ -3,6 +3,29 @@
 @theme {
   --font-sans: "Poppins", sans-serif;
   --font-poppins: "Poppins", sans-serif;
+  --font-hindi: "Mukta", sans-serif;
+  --font-hindi-heading: "Rozha One", "Yatra One", "Mukta", serif;
+  --font-hindi-calligraphy: "Rozha One", "Yatra One", serif;
+}
+
+.font-hindi {
+  font-family: 'Mukta', sans-serif;
+}
+
+.font-hindi-heading, .font-calligraphy {
+  font-family: 'Rozha One', 'Yatra One', 'Mukta', serif;
+  letter-spacing: 0.02em;
+}
+
+.font-hindi-display {
+  font-family: 'Yatra One', 'Rozha One', serif;
+}
+
+.font-hindi-slant {
+  font-family: 'Rajdhani', 'Mukta', sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 @layer base {

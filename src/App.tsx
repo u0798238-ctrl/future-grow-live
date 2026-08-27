@@ -22,6 +22,7 @@ import { TermsPage } from './pages/public/TermsPage';
 import { PrivacyPage } from './pages/public/PrivacyPage';
 import { RefundPage } from './pages/public/RefundPage';
 import { MasterRecoveryPage } from './pages/public/MasterRecoveryPage';
+import { ThePeopleSupportPage } from './pages/public/ThePeopleSupportPage';
 
 // User Pages
 import { UserDashboardPage } from './pages/user/DashboardPage';
@@ -67,6 +68,8 @@ export default function App() {
           <Route path="/ref/:ref" element={<RegisterPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/plan" element={<PlanPage />} />
+          <Route path="/the-people-support" element={<ThePeopleSupportPage />} />
+          <Route path="/people-support" element={<Navigate to="/the-people-support" replace />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
