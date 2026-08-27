@@ -5,6 +5,7 @@ import { getCurrentUserId, getMlmUsers, MlmUser } from '@/lib/mlmStore';
 export function BinaryTreePage() {
   const [users, setUsers] = useState<MlmUser[]>([]);
   const [currentRootId, setCurrentRootId] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
   const activeUserId = getCurrentUserId();
 
   useEffect(() => {
@@ -19,6 +20,24 @@ export function BinaryTreePage() {
   }, []);
 
   const rootUser = users.find(u => u.id === currentRootId);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    const q = searchQuery.trim().toLowerCase();
+    
+    const found = users.find(u => 
+      u.id.toLowerCase() === q || 
+      (u.username && u.username.toLowerCase().replace(/^@/, '') === q.replace(/^@/, ''))
+    );
+    
+    if (found) {
+      setCurrentRootId(found.id);
+      setSearchQuery('');
+    } else {
+      alert('User not found in the network.');
+    }
+  };
 
   const getChild = (parentId: string | null | undefined, position: 'Left' | 'Right') => {
     if (!parentId) return null;
@@ -156,6 +175,18 @@ export function BinaryTreePage() {
           <h2 className="text-2xl font-semibold text-white">Binary Genealogy Tree</h2>
           <p className="text-xs text-gray-300 mt-0.5">Explore left & right network hierarchy and binary pair completion</p>
         </div>
+        <form onSubmit={handleSearch} className="flex w-full md:w-auto items-center gap-2">
+          <input 
+            type="text" 
+            placeholder="Search by User ID or Username..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="px-3 py-2 bg-[#1B3343] border border-[#28485A]/50 rounded-lg text-sm text-white focus:outline-none focus:border-[#6F9DB5] w-full md:w-64"
+          />
+          <button type="submit" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-lg transition-colors">
+            Search
+          </button>
+        </form>
       </div>
 
       <div className="bg-[#132C3C] border-2 border-[#6F9DB5]/40 rounded-2xl shadow-[0_0_15px_rgba(111,157,181,0.15)]">

@@ -24,9 +24,12 @@ import {
   Trash2
 } from 'lucide-react';
 import { getCurrentUser, getCurrentUserId, updateMlmUser, MlmUser } from '@/lib/mlmStore';
+import { copyTextToClipboard } from '@/lib/utils';
 
 export function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<MlmUser>(getCurrentUser());
+  const [copiedUsername, setCopiedUsername] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
   const [formData, setFormData] = useState({
     fullName: currentUser.name || '',
     username: currentUser.username || '',
@@ -88,6 +91,26 @@ export function ProfilePage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (statusMessage) setStatusMessage(null);
+  };
+
+  const handleCopyUsername = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!formData.username) return;
+    const ok = await copyTextToClipboard(formData.username);
+    if (ok) {
+      setCopiedUsername(true);
+      setTimeout(() => setCopiedUsername(false), 2000);
+    }
+  };
+
+  const handleCopyEmail = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!formData.email) return;
+    const ok = await copyTextToClipboard(formData.email);
+    if (ok) {
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2000);
+    }
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -317,16 +340,28 @@ export function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-white">
-                    Username <span className="text-gray-400 text-xs">(Unique Login ID)</span>
-                  </label>
-                  <Input
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    placeholder="e.g. umesh123"
-                    className="bg-[#071E2C] border-emerald-500/30 focus:border-emerald-500 text-white"
-                  />
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-white">
+                      Username <span className="text-gray-400 text-xs">(Unique Login ID)</span>
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      placeholder="e.g. umesh123"
+                      className="bg-[#071E2C] border-emerald-500/30 focus:border-emerald-500 text-white pr-20"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyUsername}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-300 text-xs font-semibold px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors flex items-center gap-1"
+                    >
+                      {copiedUsername ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedUsername ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -343,17 +378,29 @@ export function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-white">
-                    Email Address <span className="text-gray-400 text-xs">(Optional)</span>
-                  </label>
-                  <Input
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter email address"
-                    className="bg-[#071E2C] border-emerald-500/30 focus:border-emerald-500 text-white"
-                  />
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-white">
+                      Email Address <span className="text-gray-400 text-xs">(Optional)</span>
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter email address"
+                      className="bg-[#071E2C] border-emerald-500/30 focus:border-emerald-500 text-white pr-20"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyEmail}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-emerald-300 text-xs font-semibold px-2 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors flex items-center gap-1"
+                    >
+                      {copiedEmail ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedEmail ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">

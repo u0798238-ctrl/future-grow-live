@@ -91,6 +91,7 @@ export default function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="users" element={<UsersPage />} />
+          <Route path="tree" element={<BinaryTreePage />} />
           <Route path="packages" element={<PackagesPage />} />
           <Route path="levels" element={<LevelIncomePage />} />
           <Route path="deposits" element={<DepositsPage />} />

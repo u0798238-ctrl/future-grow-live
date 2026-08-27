@@ -152,10 +152,16 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
 
   const handleLogout = () => {
     const currentId = localStorage.getItem('current_user_id') || currentUser?.id;
+    const isAdmin = localStorage.getItem('is_admin_session') === 'true';
+    
     if (currentId) {
       clearActiveUserSession(currentId);
     }
-    clearActiveAdminSession();
+    
+    if (isAdmin) {
+      clearActiveAdminSession();
+    }
+    
     localStorage.removeItem('is_admin_session');
     localStorage.removeItem('current_user_id');
     sessionStorage.removeItem('admin_pin_verified');
@@ -181,6 +187,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
   const adminRoutes: SidebarItem[] = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Users List', path: '/admin/users', icon: Users },
+    { name: 'Binary Tree', path: '/admin/tree', icon: GitMerge },
     { name: 'Packages', path: '/admin/packages', icon: PackageIcon },
     { name: 'Level Income', path: '/admin/levels', icon: Trophy },
     { name: 'Deposits', path: '/admin/deposits', icon: Wallet },
