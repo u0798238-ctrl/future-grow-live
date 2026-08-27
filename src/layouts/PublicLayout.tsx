@@ -7,6 +7,10 @@ export function PublicLayout() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const location = useLocation();
 
+  const isLoggedIn = Boolean(localStorage.getItem('current_user_id'));
+  const isAdmin = localStorage.getItem('is_admin_session') === 'true';
+  const dashboardUrl = isAdmin ? '/admin/dashboard' : '/user/dashboard';
+
   // Automatically close mobile menu whenever route changes
   React.useEffect(() => {
     setIsMenuOpen(false);
@@ -53,16 +57,27 @@ export function PublicLayout() {
               </nav>
 
               <div className="hidden md:flex items-center space-x-4">
-                                <InstallAppButton />
-                <Link to="/login" className="text-sm font-medium text-white hover:text-white">
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:pointer-events-none disabled:opacity-50 bg-[#1B3343] text-white hover:bg-[#28485A] h-9 px-4 py-2"
-                >
-                  Registration Now
-                </Link>
+                <InstallAppButton />
+                {isLoggedIn ? (
+                  <Link
+                    to={dashboardUrl}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 disabled:pointer-events-none disabled:opacity-50 bg-[#35B779] text-white hover:bg-[#2fa067] h-9 px-4 py-2"
+                  >
+                    Go to Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link to="/login" className="text-sm font-medium text-white hover:text-white">
+                      Login
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:pointer-events-none disabled:opacity-50 bg-[#1B3343] text-white hover:bg-[#28485A] h-9 px-4 py-2"
+                    >
+                      Registration Now
+                    </Link>
+                  </>
+                )}
               </div>
 
               {/* Mobile menu button */}
@@ -94,20 +109,32 @@ export function PublicLayout() {
                   </Link>
                 ))}
                 <div className="pt-3 pb-1 border-t border-[#28485A]/50 flex flex-col gap-2">
-                  <Link 
-                    to="/login" 
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block w-full text-center py-2.5 text-base font-semibold text-gray-200 bg-[#1B3343] hover:bg-[#28485A] rounded-lg transition-colors"
-                  >
-                    Login
-                  </Link>
-                  <Link 
-                    to="/register" 
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block w-full text-center py-2.5 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm transition-colors"
-                  >
-                    Register
-                  </Link>
+                  {isLoggedIn ? (
+                    <Link 
+                       to={dashboardUrl}
+                       onClick={() => setIsMenuOpen(false)}
+                      className="block w-full text-center py-2.5 text-base font-semibold text-white bg-[#35B779] hover:bg-[#2fa067] rounded-lg shadow-sm transition-colors"
+                    >
+                      Go to Dashboard
+                    </Link>
+                  ) : (
+                    <>
+                      <Link 
+                         to="/login"
+                         onClick={() => setIsMenuOpen(false)}
+                        className="block w-full text-center py-2.5 text-base font-semibold text-gray-200 bg-[#1B3343] hover:bg-[#28485A] rounded-lg transition-colors"
+                      >
+                        Login
+                      </Link>
+                      <Link 
+                         to="/register"
+                         onClick={() => setIsMenuOpen(false)}
+                        className="block w-full text-center py-2.5 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-sm transition-colors"
+                      >
+                        Register
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

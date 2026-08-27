@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import ScrollToTop from './components/ScrollToTop';
 
 // Layouts
 import { PublicLayout } from './layouts/PublicLayout';
@@ -52,6 +53,7 @@ import { PlaceholderPage } from './pages/PlaceholderPage';
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Public Routes */}
         <Route element={<PublicLayout />}>

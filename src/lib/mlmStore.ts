@@ -647,14 +647,14 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
 
    // Helper: get exact chronological timestamp for a user with stable sequence
    const getUserTimestamp = (u: MlmUser, fallbackIndex: number): number => {
-      if (u.joined && u.joined.includes('T')) {
+      let baseTime = new Date('2023-10-01T10:00:00Z').getTime();
+      if (u.joined) {
          const t = new Date(u.joined).getTime();
-         if (!isNaN(t)) return t;
+         if (!isNaN(t)) baseTime = t;
+      } else if (u.registeredAt) {
+         const t = new Date(u.registeredAt).getTime();
+         if (!isNaN(t)) baseTime = t;
       }
-      if (u.registeredAt && !isNaN(new Date(u.registeredAt).getTime())) {
-         return new Date(u.registeredAt).getTime();
-      }
-      const baseTime = u.joined ? new Date(u.joined).getTime() : new Date('2023-10-01T10:00:00Z').getTime();
       const idNum = parseInt(u.id.replace(/\D/g, ''), 10) || (fallbackIndex + 1);
       return baseTime + idNum * 60000;
    };

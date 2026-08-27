@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { Network, Menu, LogOut, LayoutDashboard, Users, Wallet, FileText, Settings, MessageSquare, Headset, User as UserIcon, GitMerge, ChevronDown, ArrowDownToLine, ArrowUpFromLine, ShieldCheck, Package as PackageIcon, Trophy, UserPlus, Shield, Download, Gift, Medal, Lock, KeyRound, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getCurrentUser, getMlmUsers, setCurrentUserId, getCurrentUserId, MlmUser, getPackageForUser, getSystemSettings } from '@/lib/mlmStore';
@@ -23,6 +23,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
   const [currentUser, setCurrentUser] = useState<MlmUser | null>(getCurrentUser());
   const [allUsers, setAllUsers] = useState<MlmUser[]>(getMlmUsers());
   const location = useLocation();
+
   const navigate = useNavigate();
 
   // Admin Security Password Protection State
@@ -204,7 +205,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
   const isAdminSession = localStorage.getItem('is_admin_session');
 
   if (!currentUser || !currentSessionId || (type === 'admin' && isAdminSession !== 'true')) {
-    return null; // Will redirect in useEffect
+    return <Navigate to="/login" replace />;
   }
 
   const userPkg = getPackageForUser(currentUser);
@@ -475,7 +476,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
         </header>
 
         {/* Scrollable Main Area */}
-        <main className="flex-1 overflow-y-auto bg-[#071E2C] p-4 sm:p-6 lg:p-8">
+        <main id="dashboard-main" className="flex-1 overflow-y-auto bg-[#071E2C] p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
