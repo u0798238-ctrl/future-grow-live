@@ -6,7 +6,9 @@ export default function ScrollToTop() {
 
   useEffect(() => {
     // Only scroll window for public pages (to prevent glitch in dashboard)
-    window.scrollTo(0, 0);
+    if (!pathname.startsWith('/user') && !pathname.startsWith('/admin')) {
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
 
   return null;

@@ -6,10 +6,13 @@
 }
 
 @layer base {
+
+  
   body {
     background-color: #071E2C;
     color: #FFFFFF;
     font-family: "Poppins", sans-serif;
+    -webkit-tap-highlight-color: transparent;
   }
   
   /* Update scrollbar for dark theme */

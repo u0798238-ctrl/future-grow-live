@@ -24,6 +24,13 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
   const [allUsers, setAllUsers] = useState<MlmUser[]>(getMlmUsers());
   const location = useLocation();
 
+  React.useLayoutEffect(() => {
+    const main = document.getElementById('dashboard-main');
+    if (main) {
+      main.scrollTop = 0;
+    }
+  }, [location.pathname]);
+
   const navigate = useNavigate();
 
   // Admin Security Password Protection State
@@ -315,7 +322,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
   }
 
   return (
-    <div className="h-[100dvh] w-full overflow-hidden bg-[#071E2C] flex font-sans text-white relative">
+    <div className="h-screen w-full overflow-hidden bg-[#071E2C] flex font-sans text-white">
       {/* PWA Floating Install Prompt */}
       <PwaInstallPrompt />
       <aside
