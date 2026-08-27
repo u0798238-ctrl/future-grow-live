@@ -101,6 +101,9 @@ export function UsersPage() {
   }, []);
 
   const handleLoginAsUser = (userId: string) => {
+    localStorage.removeItem('is_admin_session');
+    localStorage.removeItem('admin_security_unlocked');
+    sessionStorage.removeItem('admin_pin_verified');
     createActiveUserSession(userId);
     setCurrentUserId(userId);
     navigate('/user/dashboard');
@@ -247,13 +250,9 @@ export function UsersPage() {
     });
 
     // Update persistent store & recalculate all network commissions
-    const updated = updateUserCommissionSettings(commissionModalUser.id, {
+    updateUserCommissionSettings(commissionModalUser.id, {
       [commissionType]: newStatus
     });
-
-    if (updated) {
-      setCommissionModalUser(updated);
-    }
   };
 
   const handleQuickToggleNoPanWithdrawal = (user: MlmUser) => {
@@ -632,7 +631,7 @@ export function UsersPage() {
               <button
                 onClick={() => {
                   const restoredCount = recoverAllDeletedUsers();
-                  loadData();
+                  loadUsers();
                   showToast(`✅ Successfully recovered ${restoredCount} deleted user account(s)!`, 'success');
                 }}
                 className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/60 transition-all border border-emerald-400/40"

@@ -24,6 +24,7 @@ export function LoginPage() {
     setError('');
     const rawIdentifier = userIdentifier.trim();
     const trimmed = rawIdentifier.toLowerCase();
+    const rawUpper = rawIdentifier.toUpperCase();
     const cleanPassword = password.trim();
 
     if (!rawIdentifier || !cleanPassword) {
@@ -31,21 +32,30 @@ export function LoginPage() {
       return;
     }
 
+    // Explicitly block any attempt to login using User IDs (e.g. FGPL000001, FGPL000002, etc.)
+    if (rawUpper.startsWith('FGPL') || rawUpper.startsWith('FG')) {
+      setError('Login with User ID is not allowed. Please enter your registered Email or Username.');
+      return;
+    }
+
     const users = getMlmUsers();
 
-    // Find user by Email or Username ONLY
+    // Find user strictly by Email or Username ONLY (Never by User ID)
     const found = users.find(u => {
       const uEmail = (u.email || '').trim().toLowerCase();
       const uUsername = (u.username || '').trim().toLowerCase();
       const isRootAdmin = u.id === 'FGPL000001' || uEmail === 'uyadav73938@gmail.com';
 
-      // 1st ID (Root Admin) restricted to its registered email or username
+      // 1st ID (Root Admin) restricted strictly to its registered email (uyadav73938@gmail.com) or username (umesh)
       if (isRootAdmin) {
-        return (uEmail === 'uyadav73938@gmail.com' && trimmed === 'uyadav73938@gmail.com') || (trimmed === 'umesh');
+        return (uEmail === 'uyadav73938@gmail.com' && trimmed === 'uyadav73938@gmail.com') || 
+               (uUsername && trimmed === uUsername) || 
+               (trimmed === 'umesh');
       }
 
-      // For all regular users, strictly allow login via Email or Username ONLY (Not User ID)
-      return (uEmail && uEmail === trimmed) || (uUsername && uUsername === trimmed);
+      // For all regular users: match strictly Email or Username ONLY
+      return (uEmail && uEmail === trimmed) || 
+             (uUsername && uUsername === trimmed);
     });
 
     if (found) {
@@ -85,6 +95,8 @@ export function LoginPage() {
 
         // Regular Member Login (2nd ID onwards) - Instant direct login
         localStorage.removeItem('is_admin_session');
+        localStorage.removeItem('admin_security_unlocked');
+        sessionStorage.removeItem('admin_pin_verified');
         createActiveUserSession(found.id);
         setCurrentUserId(found.id);
         navigate('/user/dashboard');

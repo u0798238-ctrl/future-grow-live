@@ -354,8 +354,11 @@ export function RegisterPage() {
       });
 
       setRegisteredUser(newUser);
-      createActiveUserSession(newUser.id);
-      setCurrentUserId(newUser.id);
+      // Ensure all previous sessions are cleared so user must login explicitly
+      localStorage.removeItem('is_admin_session');
+      localStorage.removeItem('admin_security_unlocked');
+      sessionStorage.removeItem('admin_pin_verified');
+      localStorage.removeItem('current_user_id');
       setIsSubmitted(true);
     } catch (err: any) {
       setErrorMsg(err.message || 'Registration failed. Please check your referral code and try again.');
@@ -424,18 +427,17 @@ export function RegisterPage() {
               </div>
             </div>
 
-            <div className="w-full flex flex-col sm:flex-row gap-3">
-              <Button 
-                onClick={() => navigate('/user/dashboard')} 
-                className="flex-1 h-11 text-sm font-medium bg-[#6F9DB5] hover:bg-emerald-700 text-white rounded-xl"
-              >
-                Go to User Dashboard
-              </Button>
+            <div className="w-full space-y-3">
+              <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-left">
+                <p className="text-xs text-emerald-300 font-medium leading-relaxed">
+                  🔒 <strong>Security Notice:</strong> Your account credentials are registered. Please click below to open the Login page and enter your registered Email/Username & Password to sign in.
+                </p>
+              </div>
               <Button 
                 onClick={() => navigate('/login')} 
-                className="flex-1 h-11 text-sm font-medium bg-[#1B3343] hover:bg-[#28485A] text-white rounded-xl"
+                className="w-full h-11 text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-lg shadow-emerald-950/50"
               >
-                Go to Account Login
+                Go to Login Page
               </Button>
             </div>
           </CardContent>

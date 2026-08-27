@@ -1416,7 +1416,10 @@ export const deleteMlmUser = (userId: string, reason?: string) => {
 
    // 10. Reset current session if deleted
    if (localStorage.getItem('current_user_id') === userId) {
-      localStorage.setItem('current_user_id', 'FGPL000001');
+      localStorage.removeItem('current_user_id');
+      localStorage.removeItem('is_admin_session');
+      localStorage.removeItem('admin_security_unlocked');
+      sessionStorage.removeItem('admin_pin_verified');
    }
    
    // 11. Recalculate tree and save
@@ -1437,7 +1440,7 @@ export const recoverMlmUser = (userId: string) => {
    
    if (user.status === 'Deleted') {
        // Restore to Active if they had payment or package, else Inactive
-       user.status = (user.paymentAmount && user.paymentAmount > 0) || user.package?.includes('₹') || user.kycStatus === 'Approved' ? 'Active' : 'Inactive';
+       user.status = (user.paymentAmount && user.paymentAmount > 0) || user.package?.includes('₹') || user.kycDetails?.status === 'Approved' ? 'Active' : 'Inactive';
        users = recalculateTreeStats(users);
        localStorage.setItem('mlm_users', JSON.stringify(users)); 
        
@@ -1454,7 +1457,7 @@ export const recoverAllDeletedUsers = (): number => {
    let count = 0;
    users.forEach(u => {
      if (u.status === 'Deleted') {
-       u.status = (u.paymentAmount && u.paymentAmount > 0) || u.package?.includes('₹') || u.kycStatus === 'Approved' ? 'Active' : 'Inactive';
+       u.status = (u.paymentAmount && u.paymentAmount > 0) || u.package?.includes('₹') || u.kycDetails?.status === 'Approved' ? 'Active' : 'Inactive';
        count++;
      }
    });
@@ -2057,8 +2060,7 @@ export const addCustomCommissionBonus = (userId: string, amount: number, descrip
            date: new Date().toISOString(),
            type: 'Deposit',
            description,
-           fromUserId: 'Admin',
-           status: 'Completed'
+           status: 'Approved'
        });
        localStorage.setItem('mlm_users', JSON.stringify(users));
        import('@/lib/supabase').then(m => m.pushMlmStateToSupabase('mlm_users', users)).catch(console.error);

@@ -54,6 +54,8 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
     if (!validId) {
       // Force logout if user was deleted or localstorage is invalid
       localStorage.removeItem('is_admin_session');
+      localStorage.removeItem('admin_security_unlocked');
+      sessionStorage.removeItem('admin_pin_verified');
       localStorage.removeItem('current_user_id');
       navigate('/login');
       return;
@@ -67,11 +69,21 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
         clearActiveUserSession(currentId);
       }
       localStorage.removeItem('is_admin_session');
+      localStorage.removeItem('admin_security_unlocked');
+      sessionStorage.removeItem('admin_pin_verified');
       localStorage.removeItem('current_user_id');
       navigate('/login');
       alert('Your account has been blocked by the admin.');
       return;
     }
+
+    // If current logged-in user is a regular member (not FGPL000001), ensure admin session flags are strictly cleared
+    if (freshUser && freshUser.id !== 'FGPL000001') {
+      localStorage.removeItem('is_admin_session');
+      localStorage.removeItem('admin_security_unlocked');
+      sessionStorage.removeItem('admin_pin_verified');
+    }
+
     setCurrentUser(freshUser!);
     setAllUsers(getMlmUsers());
   };
@@ -87,9 +99,9 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
       return;
     }
     
-    // Admin Check: Require explicit admin session for admin routes
-    if (type === 'admin' && isAdminSession !== 'true') {
-      navigate('/login');
+    // Admin Check: Require explicit admin session and 1st ID for admin routes
+    if (type === 'admin' && (isAdminSession !== 'true' || validId !== 'FGPL000001')) {
+      navigate('/user/dashboard', { replace: true });
       return;
     }
 
@@ -210,14 +222,18 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
 
   const routes = type === 'user' ? userRoutes : adminRoutes;
 
-  const isRootAdmin = currentUser?.id === 'FGPL000001';
-
   // Session check before rendering anything
   const currentSessionId = localStorage.getItem('current_user_id');
   const isAdminSession = localStorage.getItem('is_admin_session');
+  const isRootAdmin = currentUser?.id === 'FGPL000001' && currentSessionId === 'FGPL000001';
 
-  if (!currentUser || !currentSessionId || (type === 'admin' && isAdminSession !== 'true')) {
+  if (!currentUser || !currentSessionId) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Strictly block and redirect any non-admin or unauthorized user attempting to access admin routes
+  if (type === 'admin' && (!isRootAdmin || isAdminSession !== 'true')) {
+    return <Navigate to="/user/dashboard" replace />;
   }
 
   const userPkg = getPackageForUser(currentUser);

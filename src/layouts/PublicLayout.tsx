@@ -7,8 +7,9 @@ export function PublicLayout() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const location = useLocation();
 
-  const isLoggedIn = Boolean(localStorage.getItem('current_user_id'));
-  const isAdmin = localStorage.getItem('is_admin_session') === 'true';
+  const currentUserId = localStorage.getItem('current_user_id');
+  const isLoggedIn = Boolean(currentUserId);
+  const isAdmin = localStorage.getItem('is_admin_session') === 'true' && currentUserId === 'FGPL000001';
   const dashboardUrl = isAdmin ? '/admin/dashboard' : '/user/dashboard';
 
   // Automatically close mobile menu whenever route changes
