@@ -199,7 +199,7 @@ export const validateAdminSession = (): { valid: boolean; reason?: string; detai
 export const clearActiveAdminSession = () => {
   sessionStorage.removeItem('my_admin_session_token');
   localStorage.removeItem('my_admin_session_token');
-  sessionStorage.removeItem('admin_security_unlocked');
+  localStorage.removeItem('admin_security_unlocked');
 
   localStorage.removeItem('mlm_active_admin_session');
   pushMlmStateToSupabase('mlm_active_admin_session', null);

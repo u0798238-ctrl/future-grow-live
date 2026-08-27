@@ -28,7 +28,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
 
   // Admin Security Password Protection State
   const [isAdminUnlocked, setIsAdminUnlocked] = useState<boolean>(() => {
-    return localStorage.getItem('is_admin_session') === 'true' || sessionStorage.getItem('admin_security_unlocked') === 'true';
+    return localStorage.getItem('is_admin_session') === 'true' || localStorage.getItem('admin_security_unlocked') === 'true';
   });
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
@@ -88,7 +88,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
         const adminValidation = validateAdminSession();
         if (!adminValidation.valid) {
           // Another admin logged in elsewhere
-          sessionStorage.removeItem('admin_security_unlocked');
+          localStorage.removeItem('admin_security_unlocked');
           localStorage.removeItem('is_admin_session');
           setIsAdminUnlocked(false);
           // Removed disruptive alert
@@ -131,7 +131,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
 
     setTimeout(() => {
       if (validPasswords.includes(entered) || entered === userPass) {
-        sessionStorage.setItem('admin_security_unlocked', 'true');
+        localStorage.setItem('admin_security_unlocked', 'true');
         createActiveAdminSession('Root Admin (FGPL000001)');
         setIsAdminUnlocked(true);
         setAdminPasswordInput('');
@@ -144,7 +144,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
   };
 
   const handleLockAdmin = () => {
-    sessionStorage.removeItem('admin_security_unlocked');
+    localStorage.removeItem('admin_security_unlocked');
     setIsAdminUnlocked(false);
     setAdminPasswordInput('');
     setAdminAuthError('');
@@ -165,7 +165,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
     localStorage.removeItem('is_admin_session');
     localStorage.removeItem('current_user_id');
     sessionStorage.removeItem('admin_pin_verified');
-    sessionStorage.removeItem('admin_security_unlocked');
+    localStorage.removeItem('admin_security_unlocked');
     navigate('/login');
   };
 

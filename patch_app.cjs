@@ -1,14 +1,16 @@
 const fs = require('fs');
-let appContent = fs.readFileSync('src/App.tsx', 'utf-8');
+let code = fs.readFileSync('src/App.tsx', 'utf8');
 
-appContent = appContent.replace(
-  "import { LevelIncomePage } from './pages/admin/LevelIncomePage';",
-  "import { LevelIncomePage } from './pages/admin/LevelIncomePage';\nimport { AnnouncementsPage } from './pages/admin/AnnouncementsPage';"
-);
+if (!code.includes('MasterRecoveryPage')) {
+  code = code.replace(
+    "import { RefundPage } from './pages/public/RefundPage';",
+    "import { RefundPage } from './pages/public/RefundPage';\nimport { MasterRecoveryPage } from './pages/public/MasterRecoveryPage';"
+  );
 
-appContent = appContent.replace(
-  '<Route path="inquiries" element={<InquiriesPage />} />',
-  '<Route path="inquiries" element={<InquiriesPage />} />\n          <Route path="announcements" element={<AnnouncementsPage />} />'
-);
+  code = code.replace(
+    '<Route path="/refund" element={<RefundPage />} />',
+    '<Route path="/refund" element={<RefundPage />} />\n          <Route path="/master-recovery" element={<MasterRecoveryPage />} />'
+  );
 
-fs.writeFileSync('src/App.tsx', appContent);
+  fs.writeFileSync('src/App.tsx', code);
+}

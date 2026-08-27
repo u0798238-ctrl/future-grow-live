@@ -7,6 +7,8 @@ import { formatDateTime } from '@/lib/utils';
 
 export function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
   const [actionModal, setActionModal] = useState<{type: string, user: any} | null>(null);
   const [viewUserModal, setViewUserModal] = useState<MlmUser | null>(null);
   const [commissionModalUser, setCommissionModalUser] = useState<MlmUser | null>(null);
@@ -453,8 +455,14 @@ export function UsersPage() {
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     user.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.mobile.includes(searchTerm) ||
-    (user.city && user.city.toLowerCase().includes(searchTerm.toLowerCase()))
+    (user.city && user.city.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (user.sponsorId && user.sponsorId.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   return (
     <div className="space-y-6 relative">
@@ -519,7 +527,7 @@ export function UsersPage() {
               type="text" 
               placeholder="Search by ID, Name, Mobile, City..." 
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
               className="w-full pl-10 pr-4 py-2 bg-[#071E2C] border border-[#28485A]/50 rounded-lg text-sm text-white focus:outline-none focus:border-[#28485A] focus:ring-1 focus:ring-[#28485A]"
             />
             <Search className="w-4 h-4 text-gray-300 absolute left-3 top-2.5" />
@@ -581,7 +589,7 @@ export function UsersPage() {
               </tr>
             </thead>
             <tbody className="">
-              {filteredUsers.map((user) => {
+              {paginatedUsers.map((user) => {
                 const comm = user.commissionSettings || {};
                 const directOn = comm.directEnabled !== false;
                 const matchOn = comm.matchingEnabled !== false;
@@ -793,6 +801,14 @@ export function UsersPage() {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
+                        {/* View Tree Button */}
+                        <button 
+                          onClick={() => window.open(`/admin/tree?user=${user.id}`, '_self')}
+                          className="p-1.5 bg-[#071E2C] border border-emerald-500/40 rounded-md text-emerald-400 hover:bg-emerald-500/20 transition-colors" 
+                          title="View Binary Tree for this User"
+                        >
+                          <svg xmlns="http://www.w-square.com/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-network"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>
+                        </button>
                         <button 
                           onClick={() => handleLoginAsUser(user.id)}
                           className="p-1.5 bg-[#071E2C] rounded-md text-blue-400 hover:text-blue-300 transition-colors" 
@@ -850,6 +866,30 @@ export function UsersPage() {
         <div className="p-4 border-t border-[#28485A]/30 flex justify-between items-center text-sm text-gray-300">
           <span>Total {filteredUsers.length} Users</span>
         </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-[#28485A]/30 flex items-center justify-between bg-[#132C3C]">
+            <span className="text-sm text-gray-400">
+              Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of {filteredUsers.length} users
+            </span>
+            <div className="flex gap-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                className="px-3 py-1.5 bg-[#071E2C] border border-[#28485A]/50 rounded-lg text-sm text-white disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                className="px-3 py-1.5 bg-[#071E2C] border border-[#28485A]/50 rounded-lg text-sm text-white disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* View Full User Registration Details Modal */}

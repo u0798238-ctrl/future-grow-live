@@ -116,7 +116,7 @@ export function LoginPage() {
     // Required Master Security Passcode: 77339933 (or backup master password)
     if (cleanPin === '77339933' || cleanPin === '7393862448') {
       localStorage.setItem('is_admin_session', 'true');
-      sessionStorage.setItem('admin_security_unlocked', 'true');
+      localStorage.setItem('admin_security_unlocked', 'true');
       sessionStorage.setItem('admin_pin_verified', 'true');
       createActiveAdminSession('Root Admin (FGPL000001)');
       createActiveUserSession('FGPL000001');

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUp, RefreshCw, User as UserIcon } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { getCurrentUserId, getMlmUsers, MlmUser } from '@/lib/mlmStore';
 
 export function BinaryTreePage() {
   const [users, setUsers] = useState<MlmUser[]>([]);
+  const [searchParams] = useSearchParams();
+  const urlUserId = searchParams.get('user');
   const [currentRootId, setCurrentRootId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const activeUserId = getCurrentUserId();
@@ -11,13 +14,13 @@ export function BinaryTreePage() {
   useEffect(() => {
     const loadUsers = () => setUsers(getMlmUsers());
     loadUsers();
-    setCurrentRootId(getCurrentUserId());
+    if (urlUserId) setCurrentRootId(urlUserId); else setCurrentRootId(getCurrentUserId());
     
     window.addEventListener('mlm_update', loadUsers);
     return () => {
       window.removeEventListener('mlm_update', loadUsers);
     };
-  }, []);
+  }, [urlUserId]);
 
   const rootUser = users.find(u => u.id === currentRootId);
 
@@ -28,7 +31,11 @@ export function BinaryTreePage() {
     
     const found = users.find(u => 
       u.id.toLowerCase() === q || 
-      (u.username && u.username.toLowerCase().replace(/^@/, '') === q.replace(/^@/, ''))
+      (u.username && u.username.toLowerCase().replace(/^@/, '') === q.replace(/^@/, '')) ||
+      (u.email && u.email.toLowerCase() === q) ||
+      (u.mobile && u.mobile === q) ||
+      (u.sponsorId && u.sponsorId.toLowerCase() === q) ||
+      (u.name && u.name.toLowerCase().includes(q))
     );
     
     if (found) {

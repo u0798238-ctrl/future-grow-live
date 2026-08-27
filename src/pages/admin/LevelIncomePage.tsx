@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X, Trophy, Activity, CheckCircle, Power, UserCheck } from 'lucide-react';
+import { getMlmUsers, MlmUser } from '@/lib/mlmStore';
 
 export const INITIAL_LEVELS = [
   { id: 1, level: 1, name: 'Silver', leftId: 2, rightId: 2, income: 3000, status: 'Active' },
@@ -24,14 +25,49 @@ export const INITIAL_LEVELS = [
   { id: 20, level: 20, name: 'Royal Universe', leftId: 1572864, rightId: 1572864, income: 1572864000, status: 'Active' },
 ];
 
-const MOCK_REPORTS = [
-  { id: 'TXN-8821', userId: 'FGPL000120', name: 'Rohan Sharma', level: 1, levelName: 'Silver', amount: 3000, date: '2023-11-20', status: 'Approved' },
-  { id: 'TXN-8822', userId: 'FGPL000045', name: 'Amit Singh', level: 2, levelName: 'Bronze', amount: 9000, date: '2023-11-19', status: 'Approved' },
-  { id: 'TXN-8823', userId: 'FGPL000002', name: 'Jane Smith', level: 4, levelName: 'Gold', amount: 36000, date: '2023-11-18', status: 'Pending' },
-];
-
 export function LevelIncomePage() {
   const [activeTab, setActiveTab] = useState<'levels' | 'reports'>('levels');
+  const [users, setUsers] = useState<MlmUser[]>([]);
+
+  useEffect(() => {
+    const loadUsers = () => {
+      setUsers(getMlmUsers());
+    };
+    loadUsers();
+    window.addEventListener('mlm_update', loadUsers);
+    return () => window.removeEventListener('mlm_update', loadUsers);
+  }, []);
+
+  const levelReports = React.useMemo(() => {
+    const reports: any[] = [];
+    users.forEach(user => {
+      if (user.transactions && Array.isArray(user.transactions)) {
+        user.transactions.forEach(tx => {
+          if (tx.type === 'Level') {
+            // Check if level Name can be extracted from description
+            let levelNumber = 0;
+            // Often description is something like "1st Level Income"
+            const match = tx.description.match(/(\d+)(st|nd|rd|th)? Level/i);
+            if (match) levelNumber = parseInt(match[1], 10);
+            
+            reports.push({
+              id: tx.id,
+              userId: user.id,
+              name: user.name,
+              level: levelNumber,
+              levelName: tx.description,
+              amount: tx.amount,
+              date: tx.date,
+              status: 'Approved'
+            });
+          }
+        });
+      }
+    });
+    return reports.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [users]);
+  
+  const totalDisbursed = levelReports.reduce((sum, r) => sum + r.amount, 0);
   const [isSystemActive, setIsSystemActive] = useState(() => {
     const saved = localStorage.getItem('app_level_system_active');
     return saved !== null ? JSON.parse(saved) : true;
@@ -271,7 +307,7 @@ export function LevelIncomePage() {
               Level Income Payouts
             </h3>
             <div className="text-sm font-semibold text-[#35B779]">
-              Total Disbursed: ₹48,000
+              Total Disbursed: ₹{totalDisbursed.toLocaleString('en-IN')}
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -287,7 +323,7 @@ export function LevelIncomePage() {
                 </tr>
               </thead>
               <tbody className="">
-                {MOCK_REPORTS.map((report) => (
+                {levelReports.map((report) => (
                   <tr key={report.id} className="border-b border-[#28485A]/50 hover:bg-[#1B3343]/40 transition-all duration-200 border-l-4 border-l-transparent hover:border-l-[#6F9DB5]">
                     <td className="px-6 py-4 font-mono text-xs">{report.id}</td>
                     <td className="px-6 py-4">
