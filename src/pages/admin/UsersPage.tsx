@@ -1838,6 +1838,13 @@ export function UsersPage() {
                           onChange={(e) => setAddFormData({...addFormData, sponsorId: e.target.value.toUpperCase()})}
                           className="w-full bg-[#132C3C] border border-[#28485A]/50 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-[#6F9DB5] uppercase font-mono" 
                         />
+                        {addFormData.sponsorId && (
+                          <div className="text-[10px] mt-1 font-semibold text-emerald-400 truncate">
+                            {users.find(u => u.id === addFormData.sponsorId)?.name 
+                              ? `Sponsor Name: ${users.find(u => u.id === addFormData.sponsorId)?.name}` 
+                              : <span className="text-red-400">Invalid Sponsor ID</span>}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <label className="text-xs font-medium text-gray-300 block mb-1.5">Placement Leg</label>
@@ -1864,6 +1871,13 @@ export function UsersPage() {
                             onChange={(e) => setAddFormData({...addFormData, targetParentId: e.target.value.toUpperCase(), sponsorId: e.target.value.toUpperCase()})}
                             className="w-full bg-[#132C3C] border border-purple-500/50 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-purple-400 uppercase font-mono" 
                           />
+                          {addFormData.targetParentId && (
+                            <div className="text-[10px] mt-1 font-semibold text-emerald-400 truncate">
+                              {users.find(u => u.id === addFormData.targetParentId)?.name 
+                                ? `Parent Name: ${users.find(u => u.id === addFormData.targetParentId)?.name}` 
+                                : <span className="text-red-400">Invalid Parent ID</span>}
+                            </div>
+                          )}
                         </div>
                         <div>
                           <label className="text-xs font-semibold text-purple-300 block mb-1.5">Target Branch Leg</label>
