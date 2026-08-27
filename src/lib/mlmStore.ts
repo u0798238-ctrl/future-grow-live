@@ -846,7 +846,7 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
             type: 'Direct',
             amount: customBonusAmount,
             description: commSettings.customBonusNote || 'Admin Special Commission Bonus',
-            date: new Date().toISOString()
+            date: new Date(getUserTimestamp(u, 0) + 2000).toISOString()
          });
       }
 
@@ -856,11 +856,11 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
          u.adminAdjustments.forEach(adj => {
             totalAdminAdjustment += adj.amount;
             u.transactions.push({
-               id: adj.id || `ADJ-${u.id}-${Date.now()}`,
+               id: adj.id || `ADJ-${u.id}-${getUserTimestamp(u, 0)}`,
                type: adj.amount >= 0 ? 'Deposit' : 'Withdrawal',
                amount: Math.abs(adj.amount),
                description: adj.reason || (adj.amount >= 0 ? 'Admin Fund Credit (वृद्धि)' : 'Admin Payment Deduction (कटौती)'),
-               date: adj.date || new Date().toISOString()
+               date: adj.date || new Date(getUserTimestamp(u, 0) + 3000).toISOString()
             });
          });
       }
@@ -896,7 +896,7 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
             type: 'Matching',
             amount: totalFlushedMatchingAcrossNetwork,
             description: 'Network Capping Overflow (Flushed to Admin)',
-            date: new Date().toISOString()
+            date: new Date(getUserTimestamp(rootAdminUser, 0) + 5000).toISOString()
          });
          rootAdminUser.totalIncome += totalFlushedMatchingAcrossNetwork;
          rootAdminUser.availableBalance += totalFlushedMatchingAcrossNetwork;

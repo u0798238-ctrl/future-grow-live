@@ -10,7 +10,6 @@ import {
   createActiveAdminSession
 } from '@/lib/sessionManager';
 import { PwaInstallPrompt, InstallAppButton } from '@/components/PwaInstallPrompt';
-import { RefreshButton } from '@/components/RefreshButton';
 import { useAdminNotifications } from '@/hooks/useAdminNotifications';
 
 interface SidebarItem {
@@ -432,8 +431,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
-            <RefreshButton />
-            <InstallAppButton className="hidden sm:flex" />
+                        <InstallAppButton className="hidden sm:flex" />
             {type === 'admin' && (
               <>
                 <Link

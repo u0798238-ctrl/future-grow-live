@@ -524,6 +524,16 @@ export function WithdrawalPage() {
               <p className="text-sm font-semibold text-gray-200 mt-1">Mon - Fri</p>
             </div>
           </div>
+
+          <div className="mt-5 pt-4 border-t border-[#28485A]/30 flex items-start gap-3">
+            <Clock className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[13px] font-medium text-emerald-300">Processing Time</p>
+              <p className="text-xs text-gray-300 mt-1 leading-relaxed">
+                Once requested, your withdrawal amount will be successfully credited to your bank account within <strong>1 to 24 hours</strong>.
+              </p>
+            </div>
+          </div>
         </div>
 
         <form className="space-y-6" onSubmit={handleWithdraw}>
