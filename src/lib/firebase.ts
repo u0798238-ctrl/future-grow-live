@@ -177,7 +177,7 @@ export const pushMlmStateToFirebase = async (key: string, value: any): Promise<b
           if (lastKnownUsers.get(user.id) !== userStr) {
              const userDoc = doc(colRef, user.id);
              promises.push(
-               setDoc(userDoc, user, { merge: true }).then(() => {
+               setDoc(userDoc, user).then(() => {
                   lastKnownUsers.set(user.id, userStr);
                })
              );

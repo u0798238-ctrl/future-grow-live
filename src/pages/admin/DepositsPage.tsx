@@ -26,10 +26,24 @@ export function DepositsPage() {
       } else if (newStatus === 'Rejected') {
         rejectUserAccount(userId);
       }
+
+      // Also ensure transaction status in user object is marked
+      let allUsers = getMlmUsers();
+      const user = allUsers.find(u => u.id === userId);
+      if (user && user.transactions) {
+        const tx = user.transactions.find(t => t.id === txId);
+        if (tx) {
+          tx.status = newStatus as any;
+        }
+        localStorage.setItem('mlm_users', JSON.stringify(allUsers));
+        const { pushMlmStateToSupabase } = await import('@/lib/mlmStore');
+        await pushMlmStateToSupabase('mlm_users', allUsers);
+      }
+
       const { forceSyncUsers } = await import('@/lib/mlmStore');
       await forceSyncUsers();
-      const allUsers = getMlmUsers();
-      setUsers(allUsers);
+      const updatedList = getMlmUsers();
+      setUsers(updatedList);
       setSelectedDeposit(null);
     } finally {
       setIsSubmitting(false);
@@ -37,12 +51,14 @@ export function DepositsPage() {
   };
 
   const allDeposits = users.flatMap(u => 
-    (u.transactions || []).filter(tx => tx.type === 'Deposit').map(tx => ({
-      userId: u.id,
-      userName: u.name,
-      screenshot: u.paymentProof,
-      ...tx
-    }))
+    (u.transactions || [])
+      .filter(tx => tx.type === 'Deposit' && !tx.id?.startsWith('ADJ-'))
+      .map(tx => ({
+        userId: u.id,
+        userName: u.name,
+        screenshot: u.paymentProof,
+        ...tx
+      }))
   ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const filteredDeposits = allDeposits.filter(d => {
@@ -103,10 +119,10 @@ export function DepositsPage() {
               </tr>
             </thead>
             <tbody className="">
-              {filteredDeposits.map((deposit) => {
+              {filteredDeposits.map((deposit, idx) => {
                 const currentStatus = deposit.status || 'Pending';
                 return (
-                  <tr key={deposit.id} className="border-b border-[#28485A]/50 hover:bg-[#1B3343]/40 transition-all duration-200 border-l-4 border-l-transparent hover:border-l-[#6F9DB5]">
+                  <tr key={`${deposit.id}-${deposit.userId}-${idx}`} className="border-b border-[#28485A]/50 hover:bg-[#1B3343]/40 transition-all duration-200 border-l-4 border-l-transparent hover:border-l-[#6F9DB5]">
                     <td className="px-6 py-4 font-mono text-xs">{deposit.id}</td>
                     <td className="px-6 py-4">
                       <div className="font-semibold text-white">{deposit.userId}</div>

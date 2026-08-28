@@ -564,6 +564,20 @@ export const getMlmUsers = (): MlmUser[] => {
                   transactions: []
                });
             }
+
+            // Cleanup & sanitize Umesh Yadav (FGPL000001) manual adjustments as requested
+            const rootAdmin = users.find(u => u.id === 'FGPL000001');
+            if (rootAdmin && (rootAdmin.adminAdjustments || rootAdmin.manualBalanceOverride !== undefined)) {
+               delete rootAdmin.adminAdjustments;
+               delete rootAdmin.manualBalanceOverride;
+               if (rootAdmin.transactions) {
+                  rootAdmin.transactions = rootAdmin.transactions.filter(t => !t.id?.startsWith('ADJ-'));
+               }
+               users = recalculateTreeStats(users);
+               localStorage.setItem('mlm_users', JSON.stringify(users));
+               pushMlmStateToSupabase('mlm_users', users);
+            }
+
             return users;
          }
       } catch (e) {
@@ -672,8 +686,8 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
       u.directJoins = 0;
       u.leftMembers = 0;
       u.rightMembers = 0;
-      // Preserve manual transactions (Withdrawals and Deposits)
-      u.transactions = u.transactions ? u.transactions.filter(t => t.type === 'Withdrawal' || t.type === 'Deposit') : [];
+      // Preserve manual transactions (Withdrawals and Deposits) excluding auto-generated IDs
+      u.transactions = u.transactions ? u.transactions.filter(t => (t.type === 'Withdrawal' || t.type === 'Deposit') && !t.id?.startsWith('ADJ-') && !t.id?.startsWith('CB-') && !t.id?.startsWith('ADMIN-FLUSH-') && !t.id?.startsWith('D-') && !t.id?.startsWith('M-') && !t.id?.startsWith('L-') && !t.id?.startsWith('DIR-') && !t.id?.startsWith('MAT-') && !t.id?.startsWith('LVL-') && !t.id?.startsWith('GIFT-')) : [];
    });
 
    // Helper: get list of active members in subtree in deterministic registration order
@@ -858,19 +872,27 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
       // 5b. Admin Fund Adjustments (Automatic Payment Cut or Credit)
       let totalAdminAdjustment = 0;
       if (u.adminAdjustments && Array.isArray(u.adminAdjustments)) {
-         u.adminAdjustments.forEach(adj => {
+         u.adminAdjustments.forEach((adj, adjIdx) => {
             totalAdminAdjustment += adj.amount;
             u.transactions.push({
-               id: adj.id || `ADJ-${u.id}-${getUserTimestamp(u, 0)}`,
+               id: adj.id || `ADJ-${u.id}-${adjIdx}-${getUserTimestamp(u, 0)}`,
                type: adj.amount >= 0 ? 'Deposit' : 'Withdrawal',
                amount: Math.abs(adj.amount),
                description: adj.reason || (adj.amount >= 0 ? 'Admin Fund Credit (वृद्धि)' : 'Admin Payment Deduction (कटौती)'),
-               date: adj.date || new Date(getUserTimestamp(u, 0) + 3000).toISOString()
+               date: adj.date || new Date(getUserTimestamp(u, 0) + 3000).toISOString(),
+               status: 'Approved'
             });
          });
       }
 
-      // 6. Sort all transactions chronologically: Newest first (preserving true audit trail)
+      // 6. Deduplicate & sort all transactions chronologically: Newest first (preserving true audit trail)
+      const seenTxIds = new Set<string>();
+      u.transactions = u.transactions.filter(tx => {
+         if (!tx.id) return false;
+         if (seenTxIds.has(tx.id)) return false;
+         seenTxIds.add(tx.id);
+         return true;
+      });
       u.transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
       // 7. Grand Totals
@@ -1485,15 +1507,21 @@ export const recoverAllDeletedUsers = (): number => {
 
 export const adjustUserFunds = (
   userId: string,
-  action: 'add' | 'deduct' | 'set',
-  amount: number,
+  action: 'add' | 'deduct' | 'set' | 'clear',
+  amount: number = 0,
   reason?: string
 ): MlmUser | null => {
   let users = getMlmUsers();
   const user = users.find(u => u.id === userId);
   if (!user) return null;
 
-  if (action === 'set') {
+  if (action === 'clear') {
+    delete user.adminAdjustments;
+    delete user.manualBalanceOverride;
+    if (user.transactions) {
+      user.transactions = user.transactions.filter(t => !t.id?.startsWith('ADJ-'));
+    }
+  } else if (action === 'set') {
     const targetBalance = Math.max(0, amount);
     user.manualBalanceOverride = targetBalance;
     const currentBal = user.availableBalance || 0;
