@@ -425,12 +425,6 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
             >
               <LayoutDashboard className="w-4 h-4 text-emerald-400" /> Go to User Dashboard
             </Link>
-            <button
-              onClick={handleLockAdmin}
-              className="w-full text-xs text-center py-2 px-3 bg-amber-950/50 hover:bg-amber-900/60 rounded-lg text-amber-300 font-medium transition-colors flex items-center justify-center gap-1.5 border border-amber-500/40 cursor-pointer"
-            >
-              <Lock className="w-3.5 h-3.5" /> Lock Admin Panel
-            </button>
           </div>
         )}
       </aside>
@@ -473,14 +467,6 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
                   <LayoutDashboard className="w-3.5 h-3.5 text-emerald-400" />
                   <span>User Dashboard</span>
                 </Link>
-                <button
-                  onClick={handleLockAdmin}
-                  className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 bg-amber-950/50 hover:bg-amber-900/60 text-amber-300 border border-amber-500/50 rounded-xl text-xs font-semibold transition-all cursor-pointer shadow-sm"
-                  title="Lock Admin Panel with Password"
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                  <span className="hidden xs:inline">Lock</span> Panel
-                </button>
               </>
             )}
             <div className="flex items-center gap-2 sm:gap-3">
