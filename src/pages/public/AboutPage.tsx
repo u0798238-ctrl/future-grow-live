@@ -171,7 +171,7 @@ export function AboutPage() {
             हमारा विजन एवं उद्देश्य
           </div>
           
-          <h2 className="text-2xl sm:text-3xl font-hindi-heading text-white">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white">
             🌟 हमारा Vision
           </h2>
           
@@ -180,7 +180,7 @@ export function AboutPage() {
           </p>
 
           <div className="bg-[#071E2C]/80 rounded-xl p-4 border border-[#28485A] max-w-2xl mx-auto">
-            <p className="text-base sm:text-lg font-hindi-heading text-white italic">
+            <p className="text-base sm:text-lg font-bold text-white italic">
               “मेहनत आपकी, दिशा Future Grow की — सफलता की राह आपकी अपनी।”
             </p>
           </div>
@@ -194,7 +194,7 @@ export function AboutPage() {
                 <Heart className="w-3.5 h-3.5 fill-rose-500/20" />
                 सामाजिक उत्तरदायित्व
               </div>
-              <h2 className="text-2xl sm:text-3xl font-hindi-heading text-white flex items-center gap-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
                 <span>❤️</span> The People Support
               </h2>
             </div>
@@ -223,7 +223,7 @@ export function AboutPage() {
             🔥 हमारा संदेश
           </div>
 
-          <h2 className="text-2xl sm:text-3xl md:text-4xl text-white leading-snug font-hindi-heading">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl text-white leading-snug font-bold">
             अगर पहले कहीं सफलता नहीं मिली, तो कोशिश करना बंद मत कीजिए।
           </h2>
 

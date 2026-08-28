@@ -677,8 +677,11 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
    });
 
    // Helper: get list of active members in subtree in deterministic registration order
-   const getActiveSubtreeMembers = (rootId: string | null): MlmUser[] => {
+   const getActiveSubtreeMembers = (rootId: string | null, visited = new Set<string>()): MlmUser[] => {
       if (!rootId) return [];
+      if (visited.has(rootId)) return [];
+      visited.add(rootId);
+      
       const u = users.find(x => x.id === rootId);
       if (!u) return [];
       const list: MlmUser[] = [];
@@ -686,8 +689,8 @@ export const recalculateTreeStats = (users: MlmUser[]): MlmUser[] => {
       if (u.status === 'Active' && !u.isFreeId && !u.package?.toLowerCase().includes('free') && !u.package?.toLowerCase().includes('only registration') && u.commissionSettings?.generatesMatching !== false && u.commissionSettings?.generatesLevel !== false) {
          list.push(u);
       }
-      list.push(...getActiveSubtreeMembers(u.leftId));
-      list.push(...getActiveSubtreeMembers(u.rightId));
+      list.push(...getActiveSubtreeMembers(u.leftId, visited));
+      list.push(...getActiveSubtreeMembers(u.rightId, visited));
       // Sort members by registration timestamp
       return list.sort((a, b) => {
          const idxA = users.findIndex(x => x.id === a.id);
@@ -1187,7 +1190,15 @@ export const addMlmUser = async (data: AddMlmUserPayload): Promise<MlmUser> => {
    } else {
       // Standard MLM leaf placement traversal
       let currentParent: MlmUser | undefined = sponsor;
+      const visited = new Set<string>();
+      
       while (currentParent && currentParent[sideKey]) {
+         if (visited.has(currentParent.id)) {
+            // Loop detected, break to avoid infinite loop freezing the browser
+            break;
+         }
+         visited.add(currentParent.id);
+         
          const nextId = currentParent[sideKey]!;
          const nextParent = users.find(u => u.id === nextId);
          if (!nextParent) {

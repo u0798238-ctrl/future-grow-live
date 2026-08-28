@@ -100,14 +100,14 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
     }
     
     // Admin Check: Require explicit admin session and 1st ID for admin routes
-    if (type === 'admin' && (isAdminSession !== 'true' || validId !== 'FGPL000001')) {
+    if (type === 'admin' && validId !== 'FGPL000001') {
       navigate('/user/dashboard', { replace: true });
       return;
     }
 
     const checkSessions = () => {
       // Validate Admin Session for concurrent logins
-      if (type === 'admin') {
+      if (type === 'admin' && isAdminUnlocked) {
         const adminValidation = validateAdminSession();
         if (!adminValidation.valid) {
           // Another admin logged in elsewhere
@@ -155,6 +155,7 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
     setTimeout(() => {
       if (validPasswords.includes(entered) || entered === userPass) {
         localStorage.setItem('admin_security_unlocked', 'true');
+        localStorage.setItem('is_admin_session', 'true');
         createActiveAdminSession('Root Admin (FGPL000001)');
         setIsAdminUnlocked(true);
         setAdminPasswordInput('');
@@ -168,6 +169,8 @@ export function DashboardLayout({ type }: { type: 'user' | 'admin' }) {
 
   const handleLockAdmin = () => {
     localStorage.removeItem('admin_security_unlocked');
+    localStorage.removeItem('is_admin_session');
+    clearActiveAdminSession();
     setIsAdminUnlocked(false);
     setAdminPasswordInput('');
     setAdminAuthError('');
